@@ -28,6 +28,20 @@ function boolToYN(value: boolean) {
   return value ? "Y" : "N";
 }
 
+const monthDotStyles: Record<CalendarFilter, string> = {
+  arrival: "bg-red-500",
+  consultation: "bg-blue-500",
+  surgery: "bg-green-500",
+  return: "bg-yellow-400"
+};
+
+const monthDotLabels: Record<CalendarFilter, string> = {
+  arrival: "Arrival",
+  consultation: "Consultation",
+  surgery: "Surgery",
+  return: "Return"
+};
+
 function FilterPill({
   label,
   checked,
@@ -65,7 +79,8 @@ export function PatientCalendarModule({ patients }: Props) {
       extendedProps: {
         patientId: event.patientId,
         redFlag: event.redFlag,
-        patient: event.patient
+        patient: event.patient,
+        matchedTypes: event.matchedTypes
       }
     }));
   }, [patients, filters]);
@@ -79,9 +94,24 @@ export function PatientCalendarModule({ patients }: Props) {
     const redFlag = Boolean(arg.event.extendedProps.redFlag);
 
     if (isMonth) {
+      const matchedTypes = (arg.event.extendedProps.matchedTypes as CalendarFilter[] | undefined) ?? [];
+
       return (
-        <div className={`truncate text-xs leading-4 ${redFlag ? "text-red-700" : "text-slate-800"}`}>
-          {arg.event.title}
+        <div
+          className={`flex items-center justify-between gap-1.5 rounded px-1 py-0.5 text-xs leading-4 ${
+            redFlag ? "text-red-700" : "text-slate-800"
+          }`}
+        >
+          <span className="truncate">{arg.event.title}</span>
+          <span className="flex shrink-0 items-center gap-1">
+            {matchedTypes.map((type) => (
+              <span
+                key={`${arg.event.id}-${type}`}
+                title={monthDotLabels[type]}
+                className={`h-1.5 w-1.5 rounded-full ${monthDotStyles[type]}`}
+              />
+            ))}
+          </span>
         </div>
       );
     }
