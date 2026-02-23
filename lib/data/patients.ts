@@ -8,13 +8,29 @@ function normalizeFilename(filename: string) {
   return filename.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-export async function listPatients(phoneQuery?: string) {
+export async function listPatients(searchQuery?: string) {
   const supabase = await createClient();
 
-  let query = supabase.from("patients").select("*").order("created_at", { ascending: false });
+  let query = supabase
+    .from("patients")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
 
-  if (phoneQuery && phoneQuery.trim().length > 0) {
-    query = query.ilike("phone", `%${phoneQuery.trim()}%`);
+  if (searchQuery && searchQuery.trim().length > 0) {
+    const term = searchQuery.trim().replaceAll(",", " ");
+    query = query.or(
+      [
+        `full_name.ilike.%${term}%`,
+        `phone.ilike.%${term}%`,
+        `patient_passport_number.ilike.%${term}%`,
+        `companion_full_name.ilike.%${term}%`,
+        `arrival_flight_code.ilike.%${term}%`,
+        `return_flight_code.ilike.%${term}%`,
+        `arrival_airport.ilike.%${term}%`,
+        `surgeries_text.ilike.%${term}%`
+      ].join(",")
+    );
   }
 
   const { data, error } = await query;

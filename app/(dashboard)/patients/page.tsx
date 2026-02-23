@@ -1,23 +1,23 @@
 import Link from "next/link";
 import { listPatients } from "@/lib/data/patients";
 import { type Patient } from "@/lib/types";
+import { PatientSearchForm } from "@/components/patients/patient-search-form";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonStyles } from "@/components/ui/button";
+import { buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 export default async function PatientsPage({
   searchParams
 }: {
-  searchParams: Promise<{ phone?: string; error?: string }>;
+  searchParams: Promise<{ q?: string; error?: string }>;
 }) {
-  const { phone, error } = await searchParams;
+  const { q, error } = await searchParams;
 
   let patientsError: string | null = null;
   let patients: Patient[] = [];
 
   try {
-    patients = await listPatients(phone);
+    patients = await listPatients(q);
   } catch (e) {
     patientsError = e instanceof Error ? e.message : "Failed to load patients";
   }
@@ -34,22 +34,7 @@ export default async function PatientsPage({
         </Link>
       </div>
 
-      <Card className="p-4">
-        <form className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <label className="block flex-1 text-sm font-medium text-slate-700">
-            Search by phone
-            <Input name="phone" defaultValue={phone ?? ""} placeholder="e.g. +90" className="mt-1" />
-          </label>
-          <div className="flex gap-2">
-            <Button type="submit" variant="secondary">
-              Search
-            </Button>
-            <Link href="/patients" className={buttonStyles({ variant: "ghost" })}>
-              Clear
-            </Link>
-          </div>
-        </form>
-      </Card>
+      <PatientSearchForm initialQuery={q ?? ""} />
 
       {error ? <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
       {patientsError ? (
@@ -73,7 +58,9 @@ export default async function PatientsPage({
               {patients.length === 0 ? (
                 <tr>
                   <td className="px-4 py-5 text-slate-500" colSpan={6}>
-                    No patients found.
+                    {q?.trim()
+                      ? "No patients matched your search."
+                      : "No patients found."}
                   </td>
                 </tr>
               ) : (
