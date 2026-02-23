@@ -58,10 +58,7 @@ function getBoolean(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
-export function patientInputFromFormData(
-  formData: FormData,
-  existingPassportPath: string | null
-): PatientInput {
+export function patientInputFromFormData(formData: FormData): PatientInput {
   return {
     full_name: getTrimmedString(formData, "full_name"),
     phone: getTrimmedString(formData, "phone"),
@@ -81,8 +78,7 @@ export function patientInputFromFormData(
     hotel_room_type: getNullableString(formData, "hotel_room_type"),
     booked_with_assistant: getBoolean(formData, "booked_with_assistant"),
     patient_passport_number: getNullableString(formData, "patient_passport_number"),
-    patient_passport_photo_path: existingPassportPath,
     companion_full_name: getNullableString(formData, "companion_full_name"),
-    companion_passport_number: getNullableString(formData, "companion_passport_number")
+    companion_passport_number: null
   };
 }

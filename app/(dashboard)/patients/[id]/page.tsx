@@ -103,11 +103,11 @@ export default async function PatientDetailPage({
               <dd>{patient.surgeries_text ?? "-"}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Passport Number</dt>
+              <dt className="text-slate-500">Patient P Number</dt>
               <dd>{patient.patient_passport_number ?? "-"}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Companion</dt>
+              <dt className="text-slate-500">Companion Name and Number</dt>
               <dd>{patient.companion_full_name ?? "-"}</dd>
             </div>
           </dl>

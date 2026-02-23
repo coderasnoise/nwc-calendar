@@ -35,9 +35,9 @@ export const patientSchema = z
     hotel_room_type: z.string().max(255).nullable(),
     booked_with_assistant: z.boolean().default(false),
     patient_passport_number: z.string().max(50).nullable(),
-    patient_passport_photo_path: z.string().max(1024).nullable(),
+    patient_passport_photo_path: z.string().max(1024).nullable().optional(),
     companion_full_name: z.string().max(255).nullable(),
-    companion_passport_number: z.string().max(50).nullable()
+    companion_passport_number: z.string().max(50).nullable().optional()
   })
   .superRefine((data, ctx) => {
     if (!data.transfer_arranged) {
