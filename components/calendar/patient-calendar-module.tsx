@@ -3,10 +3,14 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
-import { type EventContentArg } from "@fullcalendar/core";
+import { type DatesSetArg, type EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { mapPatientsToCalendarEvents, type CalendarFilter } from "@/lib/mappers/calendar";
+import {
+  mapPatientsToCalendarEvents,
+  mapPatientsToMonthCellEvents,
+  type CalendarFilter
+} from "@/lib/mappers/calendar";
 import { type Patient } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -28,14 +32,14 @@ function boolToYN(value: boolean) {
   return value ? "Y" : "N";
 }
 
-const monthDotStyles: Record<CalendarFilter, string> = {
-  arrival: "bg-red-500",
-  consultation: "bg-blue-500",
-  surgery: "bg-green-500",
-  return: "bg-yellow-400"
+const monthRowStyles: Record<CalendarFilter, string> = {
+  arrival: "bg-red-500 text-white hover:bg-red-600",
+  consultation: "bg-blue-500 text-white hover:bg-blue-600",
+  surgery: "bg-green-500 text-white hover:bg-green-600",
+  return: "bg-yellow-400 text-black hover:bg-yellow-500"
 };
 
-const monthDotLabels: Record<CalendarFilter, string> = {
+const monthRowLabels: Record<CalendarFilter, string> = {
   arrival: "Arrival",
   consultation: "Consultation",
   surgery: "Surgery",
@@ -69,8 +73,22 @@ function FilterPill({
 export function PatientCalendarModule({ patients }: Props) {
   const router = useRouter();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const [currentView, setCurrentView] = useState("dayGridMonth");
 
   const events = useMemo(() => {
+    if (currentView === "dayGridMonth") {
+      return mapPatientsToMonthCellEvents(patients, filters).map((event) => ({
+        id: event.id,
+        title: event.name,
+        start: event.date,
+        allDay: true,
+        extendedProps: {
+          patientId: event.patientId,
+          kind: event.kind
+        }
+      }));
+    }
+
     return mapPatientsToCalendarEvents(patients, filters).map((event) => ({
       id: event.id,
       title: event.fullName,
@@ -79,11 +97,10 @@ export function PatientCalendarModule({ patients }: Props) {
       extendedProps: {
         patientId: event.patientId,
         redFlag: event.redFlag,
-        patient: event.patient,
-        matchedTypes: event.matchedTypes
+        patient: event.patient
       }
     }));
-  }, [patients, filters]);
+  }, [patients, filters, currentView]);
 
   function toggleFilter(filter: CalendarFilter) {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
@@ -94,25 +111,12 @@ export function PatientCalendarModule({ patients }: Props) {
     const redFlag = Boolean(arg.event.extendedProps.redFlag);
 
     if (isMonth) {
-      const matchedTypes = (arg.event.extendedProps.matchedTypes as CalendarFilter[] | undefined) ?? [];
+      const kind = arg.event.extendedProps.kind as CalendarFilter | undefined;
 
       return (
-        <div
-          className={`flex items-center justify-between gap-1.5 rounded px-1 py-0.5 text-xs leading-4 ${
-            redFlag ? "text-red-700" : "text-slate-800"
-          }`}
-        >
-          <span className="truncate">{arg.event.title}</span>
-          <span className="flex shrink-0 items-center gap-1">
-            {matchedTypes.map((type) => (
-              <span
-                key={`${arg.event.id}-${type}`}
-                title={monthDotLabels[type]}
-                className={`h-1.5 w-1.5 rounded-full ${monthDotStyles[type]}`}
-              />
-            ))}
-          </span>
-        </div>
+        <span className="block truncate text-xs leading-4" title={kind ? monthRowLabels[kind] : undefined}>
+          {arg.event.title}
+        </span>
       );
     }
 
@@ -176,7 +180,27 @@ export function PatientCalendarModule({ patients }: Props) {
             arg.jsEvent.preventDefault();
             router.push(`/patients/${arg.event.extendedProps.patientId}`);
           }}
-          eventClassNames={() => ["cursor-pointer"]}
+          eventClassNames={(arg) => {
+            if (arg.view.type === "dayGridMonth") {
+              const kind = arg.event.extendedProps.kind as CalendarFilter | undefined;
+              return [
+                "cursor-pointer",
+                "rounded-md",
+                "px-2",
+                "py-1",
+                "text-xs",
+                "font-medium",
+                "shadow-none",
+                "transition-colors",
+                kind ? monthRowStyles[kind] : "bg-slate-500 text-white hover:bg-slate-600"
+              ];
+            }
+
+            return ["cursor-pointer"];
+          }}
+          datesSet={(arg: DatesSetArg) => {
+            setCurrentView(arg.view.type);
+          }}
           moreLinkClassNames="text-xs text-blue-700 hover:underline"
           height="auto"
         />
