@@ -58,13 +58,8 @@ function SectionTitle({ title, helper }: { title: string; helper?: string }) {
 
 export function PatientForm({ action, mode, error, patient }: PatientFormProps) {
   return (
-    <form action={action} encType="multipart/form-data" className="space-y-4">
+    <form action={action} className="space-y-4">
       {mode === "edit" ? <input type="hidden" name="id" value={patient?.id ?? ""} /> : null}
-      <input
-        type="hidden"
-        name="existing_passport_photo_path"
-        value={mode === "edit" ? patient?.patient_passport_photo_path ?? "" : ""}
-      />
 
       {error ? <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
 
@@ -209,10 +204,10 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
       </Card>
 
       <Card className="p-4">
-        <SectionTitle title="Passport & Companion" helper="Identity and storage files." />
+        <SectionTitle title="Passport & Companion" helper="Identity fields." />
         <div className="grid gap-3 md:grid-cols-2">
           <label className="text-sm font-medium text-slate-700">
-            Patient Passport Number
+            Patient P Number
             <Input
               name="patient_passport_number"
               defaultValue={patient?.patient_passport_number ?? ""}
@@ -220,20 +215,8 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
             />
           </label>
           <label className="text-sm font-medium text-slate-700">
-            Companion Full Name
+            Companion Name and Number
             <Input name="companion_full_name" defaultValue={patient?.companion_full_name ?? ""} className="mt-1" />
-          </label>
-          <label className="text-sm font-medium text-slate-700">
-            Companion Passport Number
-            <Input
-              name="companion_passport_number"
-              defaultValue={patient?.companion_passport_number ?? ""}
-              className="mt-1"
-            />
-          </label>
-          <label className="text-sm font-medium text-slate-700">
-            Passport Photo
-            <Input type="file" name="patient_passport_photo" accept="image/*,.pdf" className="mt-1" />
           </label>
         </div>
       </Card>
