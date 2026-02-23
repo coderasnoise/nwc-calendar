@@ -14,7 +14,6 @@ export type DashboardPatient = {
   surgery_date: string | null;
   return_date: string | null;
   return_time: string | null;
-  return_flight_code: string | null;
   transfer_arranged: boolean;
   hotel_arranged: boolean;
   booked_with_assistant: boolean;
@@ -53,7 +52,7 @@ export async function listDashboardPatients(start: string, end: string) {
   const { data, error } = await supabase
     .from("patients")
     .select(
-      "id,full_name,phone,arrival_date,arrival_time,arrival_airport,arrival_flight_code,consultation_date,surgery_date,return_date,return_time,return_flight_code,transfer_arranged,hotel_arranged,booked_with_assistant"
+      "id,full_name,phone,arrival_date,arrival_time,arrival_airport,arrival_flight_code,consultation_date,surgery_date,return_date,return_time,transfer_arranged,hotel_arranged,booked_with_assistant"
     )
     .or(dateWindowFilter)
     .order("arrival_date", { ascending: true, nullsFirst: false });

@@ -26,7 +26,6 @@ export async function listPatients(searchQuery?: string) {
         `patient_passport_number.ilike.%${term}%`,
         `companion_full_name.ilike.%${term}%`,
         `arrival_flight_code.ilike.%${term}%`,
-        `return_flight_code.ilike.%${term}%`,
         `arrival_airport.ilike.%${term}%`,
         `surgeries_text.ilike.%${term}%`
       ].join(",")

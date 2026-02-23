@@ -107,7 +107,7 @@ export function PatientCalendarModule({ patients }: Props) {
           Arrival: {patient.arrival_airport ?? "-"} {patient.arrival_time ?? "-"} {patient.arrival_flight_code ?? "-"}
         </p>
         <p className="text-slate-600">
-          Return: {patient.return_time ?? "-"} {patient.return_flight_code ?? "-"}
+          Return: {patient.return_time ?? "-"}
         </p>
       </article>
     );

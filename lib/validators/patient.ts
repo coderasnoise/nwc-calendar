@@ -28,7 +28,6 @@ export const patientSchema = z
     surgeries_text: z.string().max(5000).nullable(),
     return_date: nullableDateSchema,
     return_time: nullableTimeSchema,
-    return_flight_code: z.string().max(50).nullable(),
     transfer_arranged: z.boolean().default(false),
     transfer_driver_name: z.string().max(255).nullable(),
     hotel_arranged: z.boolean().default(false),

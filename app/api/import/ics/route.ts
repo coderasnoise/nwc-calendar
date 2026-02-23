@@ -172,7 +172,6 @@ export async function POST(request: Request) {
         arrival_flight_code: null,
         return_date: null,
         return_time: null,
-        return_flight_code: null,
         transfer_arranged: false,
         transfer_driver_name: null,
         hotel_arranged: false,

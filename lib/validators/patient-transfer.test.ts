@@ -14,7 +14,6 @@ function basePatient() {
     surgeries_text: null,
     return_date: null,
     return_time: null,
-    return_flight_code: null,
     transfer_arranged: false,
     transfer_driver_name: null,
     hotel_arranged: false,

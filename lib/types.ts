@@ -13,7 +13,6 @@ export interface Patient {
   surgeries_text: string | null;
   return_date: string | null;
   return_time: string | null;
-  return_flight_code: string | null;
   transfer_arranged: boolean;
   transfer_driver_name: string | null;
   hotel_arranged: boolean;
