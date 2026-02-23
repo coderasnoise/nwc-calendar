@@ -71,7 +71,6 @@ export function patientInputFromFormData(formData: FormData): PatientInput {
     surgeries_text: getNullableString(formData, "surgeries_text"),
     return_date: getNullableDateString(formData, "return_date"),
     return_time: getNullableTimeString(formData, "return_time"),
-    return_flight_code: getNullableString(formData, "return_flight_code"),
     transfer_arranged: getBoolean(formData, "transfer_arranged"),
     transfer_driver_name: getNullableString(formData, "transfer_driver_name"),
     hotel_arranged: getBoolean(formData, "hotel_arranged"),

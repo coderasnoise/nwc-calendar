@@ -80,10 +80,6 @@ export default async function PatientDetailPage({
               <dt className="text-slate-500">Return Date</dt>
               <dd>{patient.return_date ?? "-"}</dd>
             </div>
-            <div>
-              <dt className="text-slate-500">Return Flight</dt>
-              <dd>{patient.return_flight_code ?? "-"}</dd>
-            </div>
           </dl>
         </Card>
 

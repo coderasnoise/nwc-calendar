@@ -131,10 +131,6 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
               className="mt-1"
             />
           </label>
-          <label className="text-sm font-medium text-slate-700">
-            Return Flight Code
-            <Input name="return_flight_code" defaultValue={patient?.return_flight_code ?? ""} className="mt-1" />
-          </label>
         </div>
       </Card>
 
@@ -204,7 +200,7 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
       </Card>
 
       <Card className="p-4">
-        <SectionTitle title="Passport & Companion" helper="Identity fields." />
+        <SectionTitle title="Companion" helper="Identity fields." />
         <div className="grid gap-3 md:grid-cols-2">
           <label className="text-sm font-medium text-slate-700">
             Patient P Number

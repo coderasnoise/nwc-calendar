@@ -342,7 +342,7 @@ export function OpsPanel({ patients, startDate, endDate }: Props) {
                                 {patient.full_name}
                               </Link>
                               <span className="ml-2 text-xs text-slate-600">
-                                {patient.return_time ?? "-"} {patient.return_flight_code ?? "-"}
+                                {patient.return_time ?? "-"}
                               </span>
                             </li>
                           ))}
