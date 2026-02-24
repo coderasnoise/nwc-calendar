@@ -60,10 +60,11 @@ async function postPreview(file: File) {
   return body as PreviewResponse;
 }
 
-async function postImport(file: File, skipDuplicates: boolean) {
+async function postImport(file: File, skipDuplicates: boolean, selectedSourceKeys: string[]) {
   const formData = new FormData();
   formData.set("file", file);
   formData.set("skipDuplicates", String(skipDuplicates));
+  formData.set("selectedSourceKeys", JSON.stringify(selectedSourceKeys));
 
   const response = await fetch("/api/import/ics/import", {
     method: "POST",
@@ -100,6 +101,7 @@ async function postDelete(payload: { mode: "selected" | "all"; patientIds?: stri
 export function IcsImporter() {
   const [file, setFile] = useState<File | null>(null);
   const [rows, setRows] = useState<PreviewRow[]>([]);
+  const [selectedImportKeys, setSelectedImportKeys] = useState<string[]>([]);
   const [selectedDeleteIds, setSelectedDeleteIds] = useState<string[]>([]);
   const [skipDuplicates, setSkipDuplicates] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +111,19 @@ export function IcsImporter() {
 
   const validRows = useMemo(() => rows.filter((row) => row.full_name && row.surgery_date), [rows]);
   const existsRows = useMemo(() => rows.filter((row) => row.status === "EXISTS"), [rows]);
+  const selectedValidCount = useMemo(
+    () => rows.filter((row) => selectedImportKeys.includes(row.sourceKey)).length,
+    [rows, selectedImportKeys]
+  );
+
+  function toggleSelectedImport(sourceKey: string, checked: boolean) {
+    setSelectedImportKeys((prev) => {
+      if (checked) {
+        return prev.includes(sourceKey) ? prev : [...prev, sourceKey];
+      }
+      return prev.filter((key) => key !== sourceKey);
+    });
+  }
 
   function toggleSelectedDelete(patientId: string, checked: boolean) {
     setSelectedDeleteIds((prev) => {
@@ -126,6 +141,7 @@ export function IcsImporter() {
     const result = await postPreview(file);
     setRows(result.rows);
     setTotals(result.totals);
+    setSelectedImportKeys(result.rows.map((row) => row.sourceKey));
     const allowedIds = new Set(
       result.rows
         .filter((row) => row.status === "EXISTS" && row.matched_patient_id)
@@ -143,6 +159,7 @@ export function IcsImporter() {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setSelectedImportKeys([]);
     setSelectedDeleteIds([]);
 
     try {
@@ -162,12 +179,17 @@ export function IcsImporter() {
       return;
     }
 
+    if (selectedImportKeys.length === 0) {
+      setError("Please select at least one row to import.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const result = await postImport(file, skipDuplicates);
+      const result = await postImport(file, skipDuplicates, selectedImportKeys);
 
       setSuccess(
         `Imported ${result.totals.imported} row(s). Skipped ${result.totals.skipped} row(s) (${result.totals.duplicateSkipped} duplicate).`
@@ -251,7 +273,11 @@ export function IcsImporter() {
           <Button type="button" variant="secondary" onClick={handlePreview} disabled={loading}>
             Parse & Preview
           </Button>
-          <Button type="button" onClick={handleImport} disabled={loading || validRows.length === 0}>
+          <Button
+            type="button"
+            onClick={handleImport}
+            disabled={loading || validRows.length === 0 || selectedImportKeys.length === 0}
+          >
             Import
           </Button>
           <Button
@@ -275,6 +301,9 @@ export function IcsImporter() {
           <p className="text-sm text-slate-700">
             Found <strong>{totals.eventsFound}</strong> event(s), valid rows <strong>{totals.validRows}</strong>, existing matches <strong>{totals.existsRows}</strong>.
           </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Selected for import: <strong>{selectedValidCount}</strong>
+          </p>
         </Card>
       ) : null}
 
@@ -297,6 +326,7 @@ export function IcsImporter() {
           <table className="min-w-full text-sm">
             <thead className="bg-slate-100 text-left text-slate-700">
               <tr>
+                <th className="px-4 py-3 font-semibold">Import</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Name</th>
                 <th className="px-4 py-3 font-semibold">Phone</th>
@@ -308,13 +338,19 @@ export function IcsImporter() {
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-5 text-slate-500" colSpan={6}>
+                  <td className="px-4 py-5 text-slate-500" colSpan={7}>
                     Parse a file to preview rows.
                   </td>
                 </tr>
               ) : (
                 rows.map((row, index) => (
                   <tr key={row.sourceKey} className={index % 2 === 0 ? "bg-white" : "bg-slate-50/60"}>
+                    <td className="px-4 py-3">
+                      <Checkbox
+                        checked={selectedImportKeys.includes(row.sourceKey)}
+                        onChange={(event) => toggleSelectedImport(row.sourceKey, event.target.checked)}
+                      />
+                    </td>
                     <td className="px-4 py-3">{row.surgery_date}</td>
                     <td className="px-4 py-3 font-medium text-slate-800">{row.full_name}</td>
                     <td className="px-4 py-3">{row.phone ?? "-"}</td>
