@@ -3,12 +3,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
-import { type EventContentArg } from "@fullcalendar/core";
+import { type DatesSetArg, type EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { mapPatientsToCalendarEvents, type CalendarFilter } from "@/lib/mappers/calendar";
 import { type Patient } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 type Props = {
@@ -69,6 +68,7 @@ function FilterPill({
 export function PatientCalendarModule({ patients }: Props) {
   const router = useRouter();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const [currentView, setCurrentView] = useState("dayGridMonth");
 
   const events = useMemo(() => {
     return mapPatientsToCalendarEvents(patients, filters).map((event) => ({
@@ -112,28 +112,74 @@ export function PatientCalendarModule({ patients }: Props) {
     }
 
     const patient = arg.event.extendedProps.patient as Patient;
+    const arrivalLineParts = [patient.arrival_airport, patient.arrival_time, patient.arrival_flight_code].filter(
+      Boolean
+    ) as string[];
+    const returnLineParts = [patient.return_time].filter(Boolean) as string[];
 
     return (
       <article
-        className={`space-y-1 rounded-md border p-2 text-[11px] leading-4 ${
-          redFlag ? "border-red-200 bg-red-50" : "border-slate-200 bg-white"
+        className={`box-border min-w-0 w-full overflow-hidden whitespace-normal break-words rounded-md border bg-white p-2.5 shadow-sm ${
+          redFlag ? "border-red-200 bg-red-50/70" : "border-slate-200"
         }`}
       >
-        <p className="truncate font-semibold text-slate-900">{patient.full_name}</p>
-        <p className="text-slate-600">Phone: {patient.phone}</p>
-        <div className="flex flex-wrap gap-1">
-          <Badge tone={patient.transfer_arranged ? "positive" : "neutral"}>Transfer {boolToYN(patient.transfer_arranged)}</Badge>
-          <Badge tone={patient.hotel_arranged ? "positive" : "neutral"}>Hotel {boolToYN(patient.hotel_arranged)}</Badge>
-          <Badge tone={patient.booked_with_assistant ? "positive" : "neutral"}>Booked {boolToYN(patient.booked_with_assistant)}</Badge>
+        <div className="min-w-0 w-full space-y-2">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold whitespace-normal break-words text-slate-900">{patient.full_name}</p>
+            <p className="text-xs leading-5 text-slate-700 whitespace-normal break-words">{patient.phone}</p>
+          </div>
+
+          <div className="flex min-w-0 w-full flex-wrap gap-2">
+            <div className="flex min-w-0 w-full flex-wrap gap-2">
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
+                  patient.transfer_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                T:{boolToYN(patient.transfer_arranged)}
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
+                  patient.hotel_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                H:{boolToYN(patient.hotel_arranged)}
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
+                  patient.booked_with_assistant
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                B:{boolToYN(patient.booked_with_assistant)}
+              </span>
+            </div>
+          </div>
+
+          <div className="min-w-0 w-full space-y-1 text-xs leading-5 text-slate-700 whitespace-normal break-words">
+            {arrivalLineParts.length > 0 ? (
+              <p>
+                <span className="text-slate-400">Arr:</span> {arrivalLineParts.join(" ")}
+              </p>
+            ) : null}
+            {returnLineParts.length > 0 ? (
+              <p>
+                <span className="text-slate-400">Ret:</span> {returnLineParts.join(" ")}
+              </p>
+            ) : null}
+            {patient.arrival_date ? (
+              <p>
+                <span className="text-slate-400">Arr Date:</span> {patient.arrival_date}
+              </p>
+            ) : null}
+            {patient.surgeries_text ? (
+              <p>
+                <span className="text-slate-400">Surg:</span> {patient.surgeries_text}
+              </p>
+            ) : null}
+          </div>
         </div>
-        <p className="text-slate-600">Arrival date: {patient.arrival_date ?? "-"}</p>
-        <p className="text-slate-600">Surgeries: {patient.surgeries_text ?? "-"}</p>
-        <p className="text-slate-600">
-          Arrival: {patient.arrival_airport ?? "-"} {patient.arrival_time ?? "-"} {patient.arrival_flight_code ?? "-"}
-        </p>
-        <p className="text-slate-600">
-          Return: {patient.return_time ?? "-"}
-        </p>
       </article>
     );
   }
@@ -152,6 +198,9 @@ export function PatientCalendarModule({ patients }: Props) {
           <FilterPill label="Surgeries" checked={filters.surgery} onClick={() => toggleFilter("surgery")} />
           <FilterPill label="Returns" checked={filters.return} onClick={() => toggleFilter("return")} />
         </div>
+        {currentView === "dayGridWeek" ? (
+          <p className="mt-3 text-xs text-slate-500">T=Transfer, H=Hotel, B=Booked</p>
+        ) : null}
       </Card>
 
       <Card className="overflow-hidden p-3 sm:p-4">
@@ -171,9 +220,17 @@ export function PatientCalendarModule({ patients }: Props) {
             arg.jsEvent.preventDefault();
             router.push(`/patients/${arg.event.extendedProps.patientId}`);
           }}
-          eventClassNames={() => ["cursor-pointer"]}
+          eventClassNames={(arg) =>
+            arg.view.type === "dayGridWeek"
+              ? ["cursor-pointer", "fc-weekly-patient-event"]
+              : ["cursor-pointer"]
+          }
           moreLinkClassNames="text-xs text-blue-700 hover:underline"
           height="auto"
+          contentHeight="auto"
+          datesSet={(arg: DatesSetArg) => {
+            setCurrentView(arg.view.type);
+          }}
         />
       </Card>
     </section>

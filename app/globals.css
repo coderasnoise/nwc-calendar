@@ -15,3 +15,49 @@ h2,
 h3 {
   @apply tracking-tight;
 }
+
+.fc .fc-dayGridWeek-view .fc-daygrid-event,
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-main,
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-title,
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-time {
+  white-space: normal;
+}
+
+.fc .fc-dayGridWeek-view .fc-daygrid-event-harness {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.fc .fc-dayGridWeek-view .fc-daygrid-event {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-main {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.fc .fc-event {
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.fc .fc-event-title,
+.fc .fc-event-time {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.fc .fc-event:focus {
+  outline: none;
+}
+
+.fc .fc-event:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+}
