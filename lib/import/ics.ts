@@ -6,6 +6,7 @@ export type ParsedImportRow = {
   surgery_date: string;
   phone: string | null;
   notes: string | null;
+  event_uid: string | null;
 };
 
 const phoneRegex = /(?:\+?\d[\d\s().-]{8,}\d)/;
@@ -100,6 +101,7 @@ function extractRowsFromEvent(event: ical.VEvent) {
   }
 
   const { phone, notes } = parseDescription(typeof event.description === "string" ? event.description : undefined);
+  const eventUid = typeof event.uid === "string" && event.uid.trim().length > 0 ? event.uid.trim() : null;
   const rows: ParsedImportRow[] = [];
   const isDateOnly = String(event.datetype ?? "").toLowerCase() === "date";
 
@@ -134,11 +136,12 @@ function extractRowsFromEvent(event: ical.VEvent) {
     }
 
     rows.push({
-      sourceKey: `${event.uid ?? fullName}-${dateKey}-${index}`,
+      sourceKey: `${eventUid ?? fullName}-${dateKey}-${index}`,
       full_name: fullName,
       surgery_date: dateKey,
       phone,
-      notes
+      notes,
+      event_uid: eventUid
     });
   });
 
