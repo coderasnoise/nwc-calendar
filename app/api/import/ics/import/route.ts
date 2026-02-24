@@ -8,7 +8,8 @@ export const runtime = "nodejs";
 const maxFileSizeBytes = 5 * 1024 * 1024;
 
 const importOptionsSchema = z.object({
-  skipDuplicates: z.boolean().default(true)
+  skipDuplicates: z.boolean().default(true),
+  selectedSourceKeys: z.array(z.string().min(1)).default([])
 });
 
 function isIcsFile(file: File) {
@@ -28,6 +29,22 @@ function toBoolean(value: FormDataEntryValue | null) {
     return false;
   }
   return true;
+}
+
+function toStringArray(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || value.trim() === "") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+  } catch {
+    return [];
+  }
 }
 
 export async function POST(request: Request) {
@@ -56,7 +73,8 @@ export async function POST(request: Request) {
     }
 
     const parsedOptions = importOptionsSchema.safeParse({
-      skipDuplicates: toBoolean(formData.get("skipDuplicates"))
+      skipDuplicates: toBoolean(formData.get("skipDuplicates")),
+      selectedSourceKeys: toStringArray(formData.get("selectedSourceKeys"))
     });
 
     if (!parsedOptions.success) {
@@ -65,6 +83,10 @@ export async function POST(request: Request) {
 
     const text = await fileValue.text();
     const preview = await buildIcsPreview(text);
+    const rowsToImport =
+      parsedOptions.data.selectedSourceKeys.length > 0
+        ? preview.rows.filter((row) => parsedOptions.data.selectedSourceKeys.includes(row.sourceKey))
+        : preview.rows;
 
     let imported = 0;
     let skipped = 0;
@@ -86,7 +108,7 @@ export async function POST(request: Request) {
 
     const batchId = batchData.id as string;
 
-    for (const row of preview.rows) {
+    for (const row of rowsToImport) {
       if (parsedOptions.data.skipDuplicates && row.status === "EXISTS") {
         skipped += 1;
         duplicateSkipped += 1;
@@ -133,7 +155,7 @@ export async function POST(request: Request) {
       .update({
         counts: {
           eventsFound: preview.eventsFound,
-          validRows: preview.rows.length,
+          validRows: rowsToImport.length,
           imported,
           skipped,
           duplicateSkipped
@@ -145,7 +167,7 @@ export async function POST(request: Request) {
       mode: "import",
       totals: {
         eventsFound: preview.eventsFound,
-        validRows: preview.rows.length,
+        validRows: rowsToImport.length,
         imported,
         skipped,
         duplicateSkipped
