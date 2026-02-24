@@ -8,7 +8,6 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { mapPatientsToCalendarEvents, type CalendarFilter } from "@/lib/mappers/calendar";
 import { type Patient } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 type Props = {
@@ -115,25 +114,55 @@ export function PatientCalendarModule({ patients }: Props) {
 
     return (
       <article
-        className={`space-y-1 rounded-md border p-2 text-[11px] leading-4 ${
-          redFlag ? "border-red-200 bg-red-50" : "border-slate-200 bg-white"
+        className={`box-border w-full max-w-full overflow-hidden break-words rounded-lg border bg-white p-3 shadow-sm transition-all duration-150 hover:border-blue-400 hover:shadow-md ${
+          redFlag ? "border-red-200 bg-red-50/70" : "border-slate-200"
         }`}
       >
-        <p className="truncate font-semibold text-slate-900">{patient.full_name}</p>
-        <p className="text-slate-600">Phone: {patient.phone}</p>
-        <div className="flex flex-wrap gap-1">
-          <Badge tone={patient.transfer_arranged ? "positive" : "neutral"}>Transfer {boolToYN(patient.transfer_arranged)}</Badge>
-          <Badge tone={patient.hotel_arranged ? "positive" : "neutral"}>Hotel {boolToYN(patient.hotel_arranged)}</Badge>
-          <Badge tone={patient.booked_with_assistant ? "positive" : "neutral"}>Booked {boolToYN(patient.booked_with_assistant)}</Badge>
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">{patient.full_name}</p>
+            <div className="flex shrink-0 flex-wrap justify-end gap-1">
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs ${
+                  patient.transfer_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                Transfer {boolToYN(patient.transfer_arranged)}
+              </span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs ${
+                  patient.hotel_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                Hotel {boolToYN(patient.hotel_arranged)}
+              </span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs ${
+                  patient.booked_with_assistant
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                Booked {boolToYN(patient.booked_with_assistant)}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs leading-tight">
+            <p className="min-w-0 truncate text-slate-600">
+              <span className="text-slate-400">Arr:</span> {patient.arrival_date ?? "-"} {patient.arrival_time ?? "-"}
+            </p>
+            <p className="min-w-0 truncate text-slate-600">
+              <span className="text-slate-400">Apt:</span> {patient.arrival_airport ?? "-"} {patient.arrival_flight_code ?? "-"}
+            </p>
+            <p className="min-w-0 truncate text-slate-600">
+              <span className="text-slate-400">Ret:</span> {patient.return_date ?? "-"} {patient.return_time ?? "-"}
+            </p>
+            <p className="min-w-0 truncate text-slate-600">
+              <span className="text-slate-400">Surg:</span> {patient.surgeries_text ?? "-"}
+            </p>
+          </div>
         </div>
-        <p className="text-slate-600">Arrival date: {patient.arrival_date ?? "-"}</p>
-        <p className="text-slate-600">Surgeries: {patient.surgeries_text ?? "-"}</p>
-        <p className="text-slate-600">
-          Arrival: {patient.arrival_airport ?? "-"} {patient.arrival_time ?? "-"} {patient.arrival_flight_code ?? "-"}
-        </p>
-        <p className="text-slate-600">
-          Return: {patient.return_time ?? "-"}
-        </p>
       </article>
     );
   }
