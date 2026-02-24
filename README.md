@@ -44,6 +44,7 @@ npm run dev
 ## Auth Protection
 - Middleware enforces authentication on `/dashboard`, `/patients`, `/calendar`, `/timeline`, and `/audit`.
 - Unauthenticated requests to protected routes are redirected to `/login`.
+- Self-service signup is disabled in app UI. Users should be created by admin in Supabase Dashboard.
 
 ## Scripts
 - `npm run dev`
@@ -66,6 +67,24 @@ npm run dev
 - Add Vercel preview domains to redirect URLs if needed
 5. Deploy on Vercel.
 6. Verify login flow and protected routes.
+
+## Security Hardening Checklist
+1. Supabase Dashboard -> Authentication -> Providers:
+- Disable public email signup.
+2. Supabase Dashboard -> Authentication -> URL Configuration:
+- Set Site URL to production app URL (example: `https://calendar.northwesternclinic.com`).
+- Add production URL in Redirect URLs.
+3. Supabase Dashboard -> Authentication -> Users:
+- Create users manually (admin-managed access).
+4. Vercel Project -> Settings -> Environment Variables:
+- Set `NEXT_PUBLIC_SUPABASE_URL`
+- Set `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Redeploy after any env changes.
+5. Confirm security headers are active on deployed app:
+- `Content-Security-Policy`
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Strict-Transport-Security`
 
 ## Notes
 - Postgres is the source of truth.

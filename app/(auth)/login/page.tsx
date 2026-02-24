@@ -1,4 +1,4 @@
-import { login, signup } from "@/app/(auth)/login/actions";
+import { login } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,9 +34,6 @@ export default async function LoginPage({
           <div className="flex gap-2">
             <Button type="submit" formAction={login}>
               Login
-            </Button>
-            <Button type="submit" formAction={signup} variant="secondary">
-              Sign up
             </Button>
           </div>
         </form>
