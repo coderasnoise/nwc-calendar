@@ -9,9 +9,9 @@ import { Card } from "@/components/ui/card";
 export default async function PatientsPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; error?: string }>;
+  searchParams: Promise<{ q?: string; error?: string; success?: string }>;
 }) {
-  const { q, error } = await searchParams;
+  const { q, error, success } = await searchParams;
 
   let patientsError: string | null = null;
   let patients: Patient[] = [];
@@ -37,6 +37,7 @@ export default async function PatientsPage({
       <PatientSearchForm initialQuery={q ?? ""} />
 
       {error ? <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+      {success ? <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{success}</p> : null}
       {patientsError ? (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{patientsError}</p>
       ) : null}
