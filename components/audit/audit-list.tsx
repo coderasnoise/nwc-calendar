@@ -23,6 +23,16 @@ function actionTone(action: AuditListItem["action"]) {
 export function AuditList({ items }: Props) {
   const [selected, setSelected] = useState<AuditListItem | null>(null);
 
+  function displayActor(item: AuditListItem) {
+    if (item.actorEmail) {
+      return item.actorEmail;
+    }
+    if (item.actorUserId) {
+      return item.actorUserId.slice(0, 8);
+    }
+    return "-";
+  }
+
   return (
     <>
       <Card className="overflow-hidden p-0">
@@ -53,7 +63,7 @@ export function AuditList({ items }: Props) {
                       <Badge tone={actionTone(item.action)}>{item.action}</Badge>
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-800">{item.patientName}</td>
-                    <td className="px-4 py-3 text-slate-700">{item.actorEmail ?? item.actorUserId ?? "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{displayActor(item)}</td>
                     <td className="max-w-xs px-4 py-3 text-slate-700">{item.changedFields.join(", ")}</td>
                     <td className="px-4 py-3">
                       <Button type="button" variant="ghost" onClick={() => setSelected(item)}>
