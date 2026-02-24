@@ -3,14 +3,10 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
-import { type DatesSetArg, type EventContentArg } from "@fullcalendar/core";
+import { type EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import {
-  mapPatientsToCalendarEvents,
-  mapPatientsToMonthCellEvents,
-  type CalendarFilter
-} from "@/lib/mappers/calendar";
+import { mapPatientsToCalendarEvents, type CalendarFilter } from "@/lib/mappers/calendar";
 import { type Patient } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -73,22 +69,8 @@ function FilterPill({
 export function PatientCalendarModule({ patients }: Props) {
   const router = useRouter();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [currentView, setCurrentView] = useState("dayGridMonth");
 
   const events = useMemo(() => {
-    if (currentView === "dayGridMonth") {
-      return mapPatientsToMonthCellEvents(patients, filters).map((event) => ({
-        id: event.id,
-        title: event.name,
-        start: event.date,
-        allDay: true,
-        extendedProps: {
-          patientId: event.patientId,
-          kind: event.kind
-        }
-      }));
-    }
-
     return mapPatientsToCalendarEvents(patients, filters).map((event) => ({
       id: event.id,
       title: event.fullName,
@@ -97,10 +79,11 @@ export function PatientCalendarModule({ patients }: Props) {
       extendedProps: {
         patientId: event.patientId,
         redFlag: event.redFlag,
-        patient: event.patient
+        patient: event.patient,
+        matchedTypes: event.matchedTypes
       }
     }));
-  }, [patients, filters, currentView]);
+  }, [patients, filters]);
 
   function toggleFilter(filter: CalendarFilter) {
     setFilters((prev) => ({ ...prev, [filter]: !prev[filter] }));
@@ -111,12 +94,20 @@ export function PatientCalendarModule({ patients }: Props) {
     const redFlag = Boolean(arg.event.extendedProps.redFlag);
 
     if (isMonth) {
-      const kind = arg.event.extendedProps.kind as CalendarFilter | undefined;
+      const matchedTypes = (arg.event.extendedProps.matchedTypes as CalendarFilter[] | undefined) ?? [];
 
       return (
-        <span className="block truncate text-xs leading-4" title={kind ? monthRowLabels[kind] : undefined}>
-          {arg.event.title}
-        </span>
+        <div className="space-y-0.5">
+          {matchedTypes.map((type) => (
+            <span
+              key={`${arg.event.id}-${type}`}
+              title={monthRowLabels[type]}
+              className={`block truncate rounded-md px-2 py-1 text-xs font-medium leading-4 transition-colors ${monthRowStyles[type]}`}
+            >
+              {arg.event.title}
+            </span>
+          ))}
+        </div>
       );
     }
 
@@ -180,27 +171,7 @@ export function PatientCalendarModule({ patients }: Props) {
             arg.jsEvent.preventDefault();
             router.push(`/patients/${arg.event.extendedProps.patientId}`);
           }}
-          eventClassNames={(arg) => {
-            if (arg.view.type === "dayGridMonth") {
-              const kind = arg.event.extendedProps.kind as CalendarFilter | undefined;
-              return [
-                "cursor-pointer",
-                "rounded-md",
-                "px-2",
-                "py-1",
-                "text-xs",
-                "font-medium",
-                "shadow-none",
-                "transition-colors",
-                kind ? monthRowStyles[kind] : "bg-slate-500 text-white hover:bg-slate-600"
-              ];
-            }
-
-            return ["cursor-pointer"];
-          }}
-          datesSet={(arg: DatesSetArg) => {
-            setCurrentView(arg.view.type);
-          }}
+          eventClassNames={() => ["cursor-pointer"]}
           moreLinkClassNames="text-xs text-blue-700 hover:underline"
           height="auto"
         />
