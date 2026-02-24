@@ -119,34 +119,34 @@ export function PatientCalendarModule({ patients }: Props) {
 
     return (
       <article
-        className={`box-border w-full max-w-full overflow-hidden break-words rounded-lg border bg-white p-3 shadow-sm transition-all duration-150 hover:border-blue-400 hover:shadow-md ${
+        className={`box-border min-w-0 w-full overflow-hidden whitespace-normal break-words rounded-md border bg-white p-2.5 shadow-sm ${
           redFlag ? "border-red-200 bg-red-50/70" : "border-slate-200"
         }`}
       >
-        <div className="space-y-2">
+        <div className="min-w-0 w-full space-y-2">
           <div className="space-y-1">
             <p className="text-sm font-semibold whitespace-normal break-words text-slate-900">{patient.full_name}</p>
             <p className="text-xs leading-5 text-slate-700 whitespace-normal break-words">{patient.phone}</p>
           </div>
 
-          <div className="flex flex-wrap gap-1">
-            <div className="flex shrink-0 flex-wrap gap-1">
+          <div className="flex min-w-0 w-full flex-wrap gap-2">
+            <div className="flex min-w-0 w-full flex-wrap gap-2">
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
                   patient.transfer_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
                 }`}
               >
                 Transfer {boolToYN(patient.transfer_arranged)}
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
                   patient.hotel_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
                 }`}
               >
                 Hotel {boolToYN(patient.hotel_arranged)}
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-xs ${
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
                   patient.booked_with_assistant
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-slate-100 text-slate-600"
@@ -157,7 +157,7 @@ export function PatientCalendarModule({ patients }: Props) {
             </div>
           </div>
 
-          <div className="space-y-1 text-xs leading-5 text-slate-700 whitespace-normal break-words">
+          <div className="min-w-0 w-full space-y-1 text-xs leading-5 text-slate-700 whitespace-normal break-words">
             {arrivalLineParts.length > 0 ? (
               <p>
                 <span className="text-slate-400">Arr:</span> {arrivalLineParts.join(" ")}
@@ -219,7 +219,11 @@ export function PatientCalendarModule({ patients }: Props) {
                 arg.jsEvent.preventDefault();
                 router.push(`/patients/${arg.event.extendedProps.patientId}`);
               }}
-              eventClassNames={() => ["cursor-pointer"]}
+              eventClassNames={(arg) =>
+                arg.view.type === "dayGridWeek"
+                  ? ["cursor-pointer", "fc-weekly-patient-event"]
+                  : ["cursor-pointer"]
+              }
               moreLinkClassNames="text-xs text-blue-700 hover:underline"
               height="auto"
               datesSet={(arg: DatesSetArg) => {
