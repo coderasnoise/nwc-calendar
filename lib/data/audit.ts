@@ -1,6 +1,8 @@
 import "server-only";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { getPublicEnv } from "@/lib/env";
 
 export type AuditActionFilter = "insert" | "update" | "delete" | "all";
 
@@ -79,6 +81,51 @@ function getPatientName(entry: AuditLogRow, patientNameMap: Map<string, string>)
   return "Unknown patient";
 }
 
+async function resolveActorEmailMap(actorIds: string[]) {
+  const uniqueIds = Array.from(new Set(actorIds.filter((id): id is string => Boolean(id))));
+  const emailMap = new Map<string, string>();
+
+  if (uniqueIds.length === 0) {
+    return emailMap;
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    return emailMap;
+  }
+
+  const adminClient = createSupabaseClient(
+    getPublicEnv().NEXT_PUBLIC_SUPABASE_URL,
+    serviceRoleKey,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+
+  const targetIds = new Set(uniqueIds);
+  const perPage = 200;
+  let page = 1;
+
+  while (targetIds.size > 0) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
+    if (error || !data?.users || data.users.length === 0) {
+      break;
+    }
+
+    data.users.forEach((user) => {
+      if (targetIds.has(user.id) && user.email) {
+        emailMap.set(user.id, user.email);
+        targetIds.delete(user.id);
+      }
+    });
+
+    if (data.users.length < perPage) {
+      break;
+    }
+    page += 1;
+  }
+
+  return emailMap;
+}
+
 export async function listAuditLogs(filters: AuditFilters) {
   const supabase = await createClient();
 
@@ -123,14 +170,14 @@ export async function listAuditLogs(filters: AuditFilters) {
     });
   }
 
+  const actorEmailMap = await resolveActorEmailMap(rows.map((entry) => entry.actor_user_id ?? ""));
+
   let items: AuditListItem[] = rows.map((entry) => ({
     id: entry.id,
     timestamp: entry.timestamp,
     action: entry.action,
     actorUserId: entry.actor_user_id,
-    actorEmail:
-      (typeof entry.new_data?.actor_email === "string" ? entry.new_data.actor_email : null) ??
-      (typeof entry.old_data?.actor_email === "string" ? entry.old_data.actor_email : null),
+    actorEmail: entry.actor_user_id ? actorEmailMap.get(entry.actor_user_id) ?? null : null,
     patientName: getPatientName(entry, patientNameMap),
     changedFields: changedFieldsSummary(entry),
     oldData: entry.old_data,
