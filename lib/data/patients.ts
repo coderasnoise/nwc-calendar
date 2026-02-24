@@ -99,6 +99,21 @@ export async function updatePatientRecord(id: string, input: PatientInput) {
   return data;
 }
 
+export async function deletePatientRecord(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("patients").delete().eq("id", id).select("id").maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Patient not found");
+  }
+
+  return data;
+}
+
 export async function updatePatientToggleField(
   id: string,
   field: "transfer_arranged" | "hotel_arranged" | "booked_with_assistant",

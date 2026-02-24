@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import {
   createPatientRecord,
+  deletePatientRecord,
   getPatientById,
   updatePatientRecord
 } from "@/lib/data/patients";
@@ -60,4 +61,20 @@ export async function ensurePatientExists(id: string) {
     redirect("/patients?error=Patient%20not%20found");
   }
   return patient;
+}
+
+export async function deletePatientAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) {
+    redirect("/patients?error=Invalid%20patient%20id");
+  }
+
+  try {
+    await deletePatientRecord(id);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to delete patient";
+    redirect(`/patients/${id}/edit?error=${encodeURIComponent(message)}`);
+  }
+
+  redirect("/patients?success=Patient%20deleted");
 }

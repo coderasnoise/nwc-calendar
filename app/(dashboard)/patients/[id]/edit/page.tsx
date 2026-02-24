@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { updatePatientAction } from "@/app/(dashboard)/patients/actions";
+import { deletePatientAction, updatePatientAction } from "@/app/(dashboard)/patients/actions";
+import { DeletePatientForm } from "@/components/patients/delete-patient-form";
 import { PatientForm } from "@/components/patients/patient-form";
 import { buttonStyles } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { getPatientById } from "@/lib/data/patients";
 
 export default async function EditPatientPage({
@@ -32,6 +34,14 @@ export default async function EditPatientPage({
         </Link>
       </div>
       <PatientForm action={updatePatientAction} mode="edit" patient={patient} error={error} />
+
+      <Card className="space-y-3 border-red-200 bg-red-50/40">
+        <div>
+          <h3 className="text-sm font-semibold text-red-700">Danger zone</h3>
+          <p className="mt-1 text-xs text-red-600">Delete patient record.</p>
+        </div>
+        <DeletePatientForm action={deletePatientAction} patientId={id} />
+      </Card>
     </section>
   );
 }
