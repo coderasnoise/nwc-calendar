@@ -136,14 +136,14 @@ export function PatientCalendarModule({ patients }: Props) {
                   patient.transfer_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
                 }`}
               >
-                Transfer {boolToYN(patient.transfer_arranged)}
+                T:{boolToYN(patient.transfer_arranged)}
               </span>
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
                   patient.hotel_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
                 }`}
               >
-                Hotel {boolToYN(patient.hotel_arranged)}
+                H:{boolToYN(patient.hotel_arranged)}
               </span>
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
@@ -152,7 +152,7 @@ export function PatientCalendarModule({ patients }: Props) {
                     : "bg-slate-100 text-slate-600"
                 }`}
               >
-                Booked {boolToYN(patient.booked_with_assistant)}
+                B:{boolToYN(patient.booked_with_assistant)}
               </span>
             </div>
           </div>
@@ -198,40 +198,40 @@ export function PatientCalendarModule({ patients }: Props) {
           <FilterPill label="Surgeries" checked={filters.surgery} onClick={() => toggleFilter("surgery")} />
           <FilterPill label="Returns" checked={filters.return} onClick={() => toggleFilter("return")} />
         </div>
+        {currentView === "dayGridWeek" ? (
+          <p className="mt-3 text-xs text-slate-500">T=Transfer, H=Hotel, B=Booked</p>
+        ) : null}
       </Card>
 
       <Card className="overflow-hidden p-3 sm:p-4">
-        <div className={currentView === "dayGridWeek" ? "overflow-x-auto" : undefined}>
-          <div className={currentView === "dayGridWeek" ? "min-w-[1300px]" : undefined}>
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              headerToolbar={{
-                left: "prev,next today",
-                center: "title",
-                right: "dayGridMonth,dayGridWeek"
-              }}
-              events={events}
-              eventContent={renderEventContent}
-              dayMaxEvents={3}
-              moreLinkContent={(args) => `+${args.num} more`}
-              eventClick={(arg) => {
-                arg.jsEvent.preventDefault();
-                router.push(`/patients/${arg.event.extendedProps.patientId}`);
-              }}
-              eventClassNames={(arg) =>
-                arg.view.type === "dayGridWeek"
-                  ? ["cursor-pointer", "fc-weekly-patient-event"]
-                  : ["cursor-pointer"]
-              }
-              moreLinkClassNames="text-xs text-blue-700 hover:underline"
-              height="auto"
-              datesSet={(arg: DatesSetArg) => {
-                setCurrentView(arg.view.type);
-              }}
-            />
-          </div>
-        </div>
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,dayGridWeek"
+          }}
+          events={events}
+          eventContent={renderEventContent}
+          dayMaxEvents={3}
+          moreLinkContent={(args) => `+${args.num} more`}
+          eventClick={(arg) => {
+            arg.jsEvent.preventDefault();
+            router.push(`/patients/${arg.event.extendedProps.patientId}`);
+          }}
+          eventClassNames={(arg) =>
+            arg.view.type === "dayGridWeek"
+              ? ["cursor-pointer", "fc-weekly-patient-event"]
+              : ["cursor-pointer"]
+          }
+          moreLinkClassNames="text-xs text-blue-700 hover:underline"
+          height="auto"
+          contentHeight="auto"
+          datesSet={(arg: DatesSetArg) => {
+            setCurrentView(arg.view.type);
+          }}
+        />
       </Card>
     </section>
   );
