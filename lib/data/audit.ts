@@ -172,6 +172,12 @@ export async function listAuditLogs(filters: AuditFilters) {
 
   const actorEmailMap = await resolveActorEmailMap(rows.map((entry) => entry.actor_user_id ?? ""));
 
+  const { data: authUserData } = await supabase.auth.getUser();
+  const currentUser = authUserData.user;
+  if (currentUser?.id && currentUser.email && !actorEmailMap.has(currentUser.id)) {
+    actorEmailMap.set(currentUser.id, currentUser.email);
+  }
+
   let items: AuditListItem[] = rows.map((entry) => ({
     id: entry.id,
     timestamp: entry.timestamp,
