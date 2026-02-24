@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
-import { type EventContentArg } from "@fullcalendar/core";
+import { type DatesSetArg, type EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { mapPatientsToCalendarEvents, type CalendarFilter } from "@/lib/mappers/calendar";
@@ -68,6 +68,7 @@ function FilterPill({
 export function PatientCalendarModule({ patients }: Props) {
   const router = useRouter();
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const [currentView, setCurrentView] = useState("dayGridMonth");
 
   const events = useMemo(() => {
     return mapPatientsToCalendarEvents(patients, filters).map((event) => ({
@@ -111,6 +112,10 @@ export function PatientCalendarModule({ patients }: Props) {
     }
 
     const patient = arg.event.extendedProps.patient as Patient;
+    const arrivalLineParts = [patient.arrival_airport, patient.arrival_time, patient.arrival_flight_code].filter(
+      Boolean
+    ) as string[];
+    const returnLineParts = [patient.return_time].filter(Boolean) as string[];
 
     return (
       <article
@@ -119,9 +124,13 @@ export function PatientCalendarModule({ patients }: Props) {
         }`}
       >
         <div className="space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">{patient.full_name}</p>
-            <div className="flex shrink-0 flex-wrap justify-end gap-1">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold whitespace-normal break-words text-slate-900">{patient.full_name}</p>
+            <p className="text-xs leading-5 text-slate-700 whitespace-normal break-words">{patient.phone}</p>
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            <div className="flex shrink-0 flex-wrap gap-1">
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${
                   patient.transfer_arranged ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
@@ -148,19 +157,27 @@ export function PatientCalendarModule({ patients }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs leading-tight">
-            <p className="min-w-0 truncate text-slate-600">
-              <span className="text-slate-400">Arr:</span> {patient.arrival_date ?? "-"} {patient.arrival_time ?? "-"}
-            </p>
-            <p className="min-w-0 truncate text-slate-600">
-              <span className="text-slate-400">Apt:</span> {patient.arrival_airport ?? "-"} {patient.arrival_flight_code ?? "-"}
-            </p>
-            <p className="min-w-0 truncate text-slate-600">
-              <span className="text-slate-400">Ret:</span> {patient.return_date ?? "-"} {patient.return_time ?? "-"}
-            </p>
-            <p className="min-w-0 truncate text-slate-600">
-              <span className="text-slate-400">Surg:</span> {patient.surgeries_text ?? "-"}
-            </p>
+          <div className="space-y-1 text-xs leading-5 text-slate-700 whitespace-normal break-words">
+            {arrivalLineParts.length > 0 ? (
+              <p>
+                <span className="text-slate-400">Arr:</span> {arrivalLineParts.join(" ")}
+              </p>
+            ) : null}
+            {returnLineParts.length > 0 ? (
+              <p>
+                <span className="text-slate-400">Ret:</span> {returnLineParts.join(" ")}
+              </p>
+            ) : null}
+            {patient.arrival_date ? (
+              <p>
+                <span className="text-slate-400">Arr Date:</span> {patient.arrival_date}
+              </p>
+            ) : null}
+            {patient.surgeries_text ? (
+              <p>
+                <span className="text-slate-400">Surg:</span> {patient.surgeries_text}
+              </p>
+            ) : null}
           </div>
         </div>
       </article>
@@ -184,26 +201,33 @@ export function PatientCalendarModule({ patients }: Props) {
       </Card>
 
       <Card className="overflow-hidden p-3 sm:p-4">
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,dayGridWeek"
-          }}
-          events={events}
-          eventContent={renderEventContent}
-          dayMaxEvents={3}
-          moreLinkContent={(args) => `+${args.num} more`}
-          eventClick={(arg) => {
-            arg.jsEvent.preventDefault();
-            router.push(`/patients/${arg.event.extendedProps.patientId}`);
-          }}
-          eventClassNames={() => ["cursor-pointer"]}
-          moreLinkClassNames="text-xs text-blue-700 hover:underline"
-          height="auto"
-        />
+        <div className={currentView === "dayGridWeek" ? "overflow-x-auto" : undefined}>
+          <div className={currentView === "dayGridWeek" ? "min-w-[1300px]" : undefined}>
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              headerToolbar={{
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridMonth,dayGridWeek"
+              }}
+              events={events}
+              eventContent={renderEventContent}
+              dayMaxEvents={3}
+              moreLinkContent={(args) => `+${args.num} more`}
+              eventClick={(arg) => {
+                arg.jsEvent.preventDefault();
+                router.push(`/patients/${arg.event.extendedProps.patientId}`);
+              }}
+              eventClassNames={() => ["cursor-pointer"]}
+              moreLinkClassNames="text-xs text-blue-700 hover:underline"
+              height="auto"
+              datesSet={(arg: DatesSetArg) => {
+                setCurrentView(arg.view.type);
+              }}
+            />
+          </div>
+        </div>
       </Card>
     </section>
   );

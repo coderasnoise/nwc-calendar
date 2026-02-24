@@ -15,3 +15,10 @@ h2,
 h3 {
   @apply tracking-tight;
 }
+
+.fc .fc-dayGridWeek-view .fc-daygrid-event,
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-main,
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-title,
+.fc .fc-dayGridWeek-view .fc-daygrid-event .fc-event-time {
+  white-space: normal;
+}
