@@ -11,6 +11,14 @@ export type ParsedImportRow = {
 
 const phoneRegex = /(?:\+?\d[\d\s().-]{8,}\d)/;
 
+function sanitizePlainText(value: string) {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function toDateString(date: Date, useLocalDate: boolean) {
   const year = useLocalDate ? date.getFullYear() : date.getUTCFullYear();
   const month = String((useLocalDate ? date.getMonth() : date.getUTCMonth()) + 1).padStart(2, "0");
@@ -59,7 +67,7 @@ export function normalizePhone(phone: string | null | undefined) {
 }
 
 function parseDescription(description: string | undefined) {
-  const text = (description ?? "").replace(/\r/g, "").trim();
+  const text = sanitizePlainText((description ?? "").replace(/\r/g, ""));
   if (!text) {
     return { phone: null, notes: null };
   }
@@ -95,7 +103,7 @@ function extractRowsFromEvent(event: ical.VEvent) {
     return [] as ParsedImportRow[];
   }
 
-  const fullName = String(event.summary).trim();
+  const fullName = sanitizePlainText(String(event.summary));
   if (!fullName) {
     return [] as ParsedImportRow[];
   }
