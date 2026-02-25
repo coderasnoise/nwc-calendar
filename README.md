@@ -92,6 +92,10 @@ Use lowercase usernames only.
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
 - `Strict-Transport-Security`
+7. GitHub Actions and repository secrets:
+- Store all deployment/API secrets in GitHub `Settings -> Secrets and variables -> Actions`.
+- Do not commit any keys/tokens in source code or workflow files.
+- Keep `.env*` files ignored by git.
 
 ## Notes
 - Postgres is the source of truth.
