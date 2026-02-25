@@ -73,7 +73,7 @@ npm run dev
 1. Supabase Dashboard -> Authentication -> Providers:
 - Disable public email signup.
 2. Supabase Dashboard -> Authentication -> URL Configuration:
-- Set Site URL to production app URL (example: `https://calendar.northwesternclinic.com`).
+- Set Site URL to production app URL.
 - Add production URL in Redirect URLs.
 3. Supabase Dashboard -> Authentication -> Users:
 - Create users manually (admin-managed access).
