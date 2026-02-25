@@ -45,6 +45,7 @@ npm run dev
 - Middleware enforces authentication on `/dashboard`, `/patients`, `/calendar`, `/timeline`, and `/audit`.
 - Unauthenticated requests to protected routes are redirected to `/login`.
 - Self-service signup is disabled in app UI. Users should be created by admin in Supabase Dashboard.
+- Login uses `username + password` in UI. Username resolves to email via `public.auth_usernames`.
 
 ## Scripts
 - `npm run dev`
@@ -76,11 +77,17 @@ npm run dev
 - Add production URL in Redirect URLs.
 3. Supabase Dashboard -> Authentication -> Users:
 - Create users manually (admin-managed access).
-4. Vercel Project -> Settings -> Environment Variables:
+4. For each created user, add a username mapping in SQL Editor:
+```sql
+insert into public.auth_usernames (user_id, username, email)
+values ('<auth_user_uuid>', '<lowercase_username>', '<user_email>');
+```
+Use lowercase usernames only.
+5. Vercel Project -> Settings -> Environment Variables:
 - Set `NEXT_PUBLIC_SUPABASE_URL`
 - Set `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - Redeploy after any env changes.
-5. Confirm security headers are active on deployed app:
+6. Confirm security headers are active on deployed app:
 - `Content-Security-Policy`
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
