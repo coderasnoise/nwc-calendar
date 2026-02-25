@@ -20,8 +20,8 @@ export default async function LoginPage({
 
         <form className="space-y-3">
           <label className="block text-sm font-medium text-slate-700">
-            Email
-            <Input name="email" type="email" required className="mt-1" placeholder="you@example.com" />
+            Username
+            <Input name="username" required className="mt-1" placeholder="your.username" />
           </label>
 
           <label className="block text-sm font-medium text-slate-700">
