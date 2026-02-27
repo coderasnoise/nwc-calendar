@@ -56,6 +56,14 @@ function SectionTitle({ title, helper }: { title: string; helper?: string }) {
   );
 }
 
+function formatNumberInputValue(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return "";
+  }
+
+  return String(value);
+}
+
 export function PatientForm({ action, mode, error, patient }: PatientFormProps) {
   return (
     <form action={action} className="space-y-4">
@@ -213,6 +221,44 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
           <label className="text-sm font-medium text-slate-700">
             Companion Name and Number
             <Input name="companion_full_name" defaultValue={patient?.companion_full_name ?? ""} className="mt-1" />
+          </label>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <SectionTitle title="Payment" helper="Payment method and expected amount." />
+        <div className="grid gap-3 md:grid-cols-3">
+          <label className="text-sm font-medium text-slate-700">
+            Payment Method
+            <Select name="payment_method" defaultValue={patient?.payment_method ?? ""} className="mt-1">
+              <option value="">Select</option>
+              <option value="cash">Cash</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="card">Card</option>
+            </Select>
+          </label>
+
+          <label className="text-sm font-medium text-slate-700">
+            Currency
+            <Select name="payment_currency" defaultValue={patient?.payment_currency ?? ""} className="mt-1">
+              <option value="">Select</option>
+              <option value="GBP">GBP</option>
+              <option value="AUD">AUD</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </Select>
+          </label>
+
+          <label className="text-sm font-medium text-slate-700">
+            Amount
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              name="payment_amount"
+              defaultValue={formatNumberInputValue(patient?.payment_amount)}
+              className="mt-1"
+            />
           </label>
         </div>
       </Card>

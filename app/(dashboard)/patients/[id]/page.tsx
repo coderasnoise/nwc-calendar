@@ -16,6 +16,18 @@ function displayBool(value: boolean) {
   return value ? "Yes" : "No";
 }
 
+function displayPaymentMethod(value: "cash" | "bank_transfer" | "card" | null | undefined) {
+  if (!value) {
+    return "—";
+  }
+
+  if (value === "bank_transfer") {
+    return "Bank Transfer";
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 export default async function PatientDetailPage({
   params
 }: {
@@ -194,6 +206,28 @@ export default async function PatientDetailPage({
               <p className="text-sm text-red-700">{photoError ?? "Photo not available"}</p>
             )
           ) : null}
+        </Card>
+
+        <Card className="space-y-3">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Payment</h3>
+          <dl className="grid gap-2 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-slate-500">Method</dt>
+              <dd>{displayPaymentMethod(patient.payment_method)}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Currency</dt>
+              <dd>{displayValue(patient.payment_currency)}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Amount</dt>
+              <dd>
+                {patient.payment_amount === null || patient.payment_amount === undefined
+                  ? "—"
+                  : String(patient.payment_amount)}
+              </dd>
+            </div>
+          </dl>
         </Card>
       </div>
     </section>
