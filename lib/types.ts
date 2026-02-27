@@ -22,6 +22,9 @@ export interface Patient {
   patient_passport_photo_path: string | null;
   companion_full_name: string | null;
   companion_passport_number: string | null;
+  payment_method: "cash" | "bank_transfer" | "card" | null;
+  payment_currency: "GBP" | "AUD" | "USD" | "EUR" | null;
+  payment_amount: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -58,6 +58,21 @@ function getBoolean(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
+function getNullableNumber(formData: FormData, key: string) {
+  const raw = getTrimmedString(formData, key);
+  if (!raw) {
+    return null;
+  }
+
+  const normalized = raw.replace(",", ".");
+  const value = Number(normalized);
+  if (!Number.isFinite(value)) {
+    return Number.NaN;
+  }
+
+  return value;
+}
+
 export function patientInputFromFormData(formData: FormData): PatientInput {
   return {
     full_name: getTrimmedString(formData, "full_name"),
@@ -78,6 +93,18 @@ export function patientInputFromFormData(formData: FormData): PatientInput {
     booked_with_assistant: getBoolean(formData, "booked_with_assistant"),
     patient_passport_number: getNullableString(formData, "patient_passport_number"),
     companion_full_name: getNullableString(formData, "companion_full_name"),
-    companion_passport_number: null
+    companion_passport_number: null,
+    payment_method: (getNullableString(formData, "payment_method") as
+      | "cash"
+      | "bank_transfer"
+      | "card"
+      | null) ?? null,
+    payment_currency: (getNullableString(formData, "payment_currency") as
+      | "GBP"
+      | "AUD"
+      | "USD"
+      | "EUR"
+      | null) ?? null,
+    payment_amount: getNullableNumber(formData, "payment_amount")
   };
 }

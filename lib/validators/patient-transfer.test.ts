@@ -22,7 +22,10 @@ function basePatient() {
     patient_passport_number: null,
     patient_passport_photo_path: null,
     companion_full_name: null,
-    companion_passport_number: null
+    companion_passport_number: null,
+    payment_method: null,
+    payment_currency: null,
+    payment_amount: null
   };
 }
 
