@@ -8,6 +8,46 @@ function normalizeFilename(filename: string) {
   return filename.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+function getPatientSortDate(patient: Patient) {
+  const dates = [
+    patient.arrival_date,
+    patient.consultation_date,
+    patient.surgery_date,
+    patient.return_date
+  ].filter((value): value is string => Boolean(value));
+
+  if (dates.length === 0) {
+    return null;
+  }
+
+  return [...dates].sort((a, b) => a.localeCompare(b))[0];
+}
+
+function sortPatientsByNearestDate(patients: Patient[]) {
+  return [...patients].sort((a, b) => {
+    const aDate = getPatientSortDate(a);
+    const bDate = getPatientSortDate(b);
+
+    if (!aDate && !bDate) {
+      return a.full_name.localeCompare(b.full_name);
+    }
+
+    if (!aDate) {
+      return 1;
+    }
+
+    if (!bDate) {
+      return -1;
+    }
+
+    if (aDate === bDate) {
+      return a.full_name.localeCompare(b.full_name);
+    }
+
+    return aDate.localeCompare(bDate);
+  });
+}
+
 export async function listPatients(searchQuery?: string) {
   const supabase = await createClient();
 
@@ -38,27 +78,12 @@ export async function listPatients(searchQuery?: string) {
     throw new Error(error.message);
   }
 
-  return (data ?? []) as Patient[];
+  return sortPatientsByNearestDate((data ?? []) as Patient[]);
 }
 
 export async function listPatientsForTimeline() {
   const patients = await listPatients();
-
-  return [...patients].sort((a, b) => {
-    if (!a.arrival_date && !b.arrival_date) {
-      return a.full_name.localeCompare(b.full_name);
-    }
-    if (!a.arrival_date) {
-      return 1;
-    }
-    if (!b.arrival_date) {
-      return -1;
-    }
-    if (a.arrival_date === b.arrival_date) {
-      return a.full_name.localeCompare(b.full_name);
-    }
-    return a.arrival_date.localeCompare(b.arrival_date);
-  });
+  return sortPatientsByNearestDate(patients);
 }
 
 export async function getPatientById(id: string) {
