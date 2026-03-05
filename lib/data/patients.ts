@@ -85,14 +85,26 @@ export async function listSurgeryOptions() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("surgery_options")
-    .select("id, name")
+    .select("id, name, category")
     .order("name", { ascending: true });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data ?? []) as SurgeryOption[];
+  const categoryRank: Record<SurgeryOption["category"], number> = {
+    face: 0,
+    body: 1,
+    other: 2
+  };
+
+  return ((data ?? []) as SurgeryOption[]).sort((a, b) => {
+    const categoryDiff = categoryRank[a.category] - categoryRank[b.category];
+    if (categoryDiff !== 0) {
+      return categoryDiff;
+    }
+    return a.name.localeCompare(b.name);
+  });
 }
 
 export async function listPatientsForTimeline() {

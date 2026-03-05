@@ -65,7 +65,25 @@ function formatNumberInputValue(value: number | null | undefined) {
   return String(value);
 }
 
+function surgeryCategoryLabel(category: SurgeryOption["category"]) {
+  if (category === "face") {
+    return "Face";
+  }
+  if (category === "body") {
+    return "Body";
+  }
+  return "Other";
+}
+
 export function PatientForm({ action, mode, error, patient, surgeryOptions }: PatientFormProps) {
+  const groupedSurgeryOptions = surgeryOptions.reduce<Record<SurgeryOption["category"], SurgeryOption[]>>(
+    (acc, option) => {
+      acc[option.category].push(option);
+      return acc;
+    },
+    { face: [], body: [], other: [] }
+  );
+
   return (
     <form action={action} className="space-y-4">
       {mode === "edit" ? <input type="hidden" name="id" value={patient?.id ?? ""} /> : null}
@@ -169,17 +187,28 @@ export function PatientForm({ action, mode, error, patient, surgeryOptions }: Pa
             {surgeryOptions.length === 0 ? (
               <p className="mt-1 text-xs text-slate-500">No surgery options yet. Add options in database.</p>
             ) : (
-              <div className="mt-2 grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
-                {surgeryOptions.map((option) => (
-                  <label key={option.id} className="inline-flex items-center gap-2 text-sm text-slate-700">
-                    <Checkbox
-                      name="surgeries_selected"
-                      value={option.name}
-                      defaultChecked={patient?.surgeries_selected?.includes(option.name) ?? false}
-                    />
-                    {option.name}
-                  </label>
-                ))}
+              <div className="mt-2 space-y-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                {(Object.keys(groupedSurgeryOptions) as SurgeryOption["category"][]).map((category) =>
+                  groupedSurgeryOptions[category].length > 0 ? (
+                    <div key={category} className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {surgeryCategoryLabel(category)}
+                      </p>
+                      <div className="grid gap-2 md:grid-cols-2">
+                        {groupedSurgeryOptions[category].map((option) => (
+                          <label key={option.id} className="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <Checkbox
+                              name="surgeries_selected"
+                              value={option.name}
+                              defaultChecked={patient?.surgeries_selected?.includes(option.name) ?? false}
+                            />
+                            {option.name}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null
+                )}
               </div>
             )}
           </div>
