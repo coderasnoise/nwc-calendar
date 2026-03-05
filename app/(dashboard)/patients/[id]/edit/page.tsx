@@ -5,7 +5,7 @@ import { DeletePatientForm } from "@/components/patients/delete-patient-form";
 import { PatientForm } from "@/components/patients/patient-form";
 import { buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getPatientById } from "@/lib/data/patients";
+import { getPatientById, listSurgeryOptions } from "@/lib/data/patients";
 
 export default async function EditPatientPage({
   params,
@@ -17,6 +17,7 @@ export default async function EditPatientPage({
   const { id } = await params;
   const { error } = await searchParams;
   const patient = await getPatientById(id);
+  const surgeryOptions = await listSurgeryOptions();
 
   if (!patient) {
     notFound();
@@ -33,7 +34,13 @@ export default async function EditPatientPage({
           Back to detail
         </Link>
       </div>
-      <PatientForm action={updatePatientAction} mode="edit" patient={patient} error={error} />
+      <PatientForm
+        action={updatePatientAction}
+        mode="edit"
+        patient={patient}
+        error={error}
+        surgeryOptions={surgeryOptions}
+      />
 
       <Card className="space-y-3 border-red-200 bg-red-50/40">
         <div>

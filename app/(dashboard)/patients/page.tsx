@@ -74,6 +74,9 @@ export default async function PatientsPage({
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1.5">
                         <Badge tone={patient.transfer_arranged ? "positive" : "neutral"}>Transfer {patient.transfer_arranged ? "Y" : "N"}</Badge>
+                        <Badge tone={patient.return_transfer_arranged ? "positive" : "neutral"}>
+                          Return Transfer {patient.return_transfer_arranged ? "Y" : "N"}
+                        </Badge>
                         <Badge tone={patient.hotel_arranged ? "positive" : "neutral"}>Hotel {patient.hotel_arranged ? "Y" : "N"}</Badge>
                         <Badge tone={patient.booked_with_assistant ? "positive" : "neutral"}>Booked {patient.booked_with_assistant ? "Y" : "N"}</Badge>
                       </div>

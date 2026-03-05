@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PatientForm } from "@/components/patients/patient-form";
 import { createPatientAction } from "@/app/(dashboard)/patients/actions";
 import { buttonStyles } from "@/components/ui/button";
+import { listSurgeryOptions } from "@/lib/data/patients";
 
 export default async function NewPatientPage({
   searchParams
@@ -9,6 +10,7 @@ export default async function NewPatientPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const surgeryOptions = await listSurgeryOptions();
 
   return (
     <section className="space-y-5">
@@ -21,7 +23,7 @@ export default async function NewPatientPage({
           Back to list
         </Link>
       </div>
-      <PatientForm action={createPatientAction} mode="create" error={error} />
+      <PatientForm action={createPatientAction} mode="create" error={error} surgeryOptions={surgeryOptions} />
     </section>
   );
 }

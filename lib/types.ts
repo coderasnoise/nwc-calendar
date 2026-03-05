@@ -13,6 +13,7 @@ export interface Patient {
   surgeries_text: string | null;
   return_date: string | null;
   return_time: string | null;
+  return_transfer_arranged: boolean;
   transfer_arranged: boolean;
   transfer_driver_name: string | null;
   hotel_arranged: boolean;
@@ -25,8 +26,14 @@ export interface Patient {
   payment_method: "cash" | "bank_transfer" | "card" | null;
   payment_currency: "GBP" | "AUD" | "USD" | "EUR" | null;
   payment_amount: number | null;
+  surgeries_selected: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface SurgeryOption {
+  id: string;
+  name: string;
 }
 
 export interface AuditLog {

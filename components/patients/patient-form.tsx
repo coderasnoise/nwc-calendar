@@ -1,4 +1,4 @@
-import { type Patient } from "@/lib/types";
+import { type Patient, type SurgeryOption } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,6 +10,7 @@ type PatientFormProps = {
   mode: "create" | "edit";
   error?: string;
   patient?: Patient;
+  surgeryOptions: SurgeryOption[];
 };
 
 function formatDateInputValue(value: string | null | undefined) {
@@ -64,7 +65,7 @@ function formatNumberInputValue(value: number | null | undefined) {
   return String(value);
 }
 
-export function PatientForm({ action, mode, error, patient }: PatientFormProps) {
+export function PatientForm({ action, mode, error, patient, surgeryOptions }: PatientFormProps) {
   return (
     <form action={action} className="space-y-4">
       {mode === "edit" ? <input type="hidden" name="id" value={patient?.id ?? ""} /> : null}
@@ -163,8 +164,28 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
               className="mt-1"
             />
           </label>
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium text-slate-700">Surgeries</label>
+            {surgeryOptions.length === 0 ? (
+              <p className="mt-1 text-xs text-slate-500">No surgery options yet. Add options in database.</p>
+            ) : (
+              <div className="mt-2 grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
+                {surgeryOptions.map((option) => (
+                  <label key={option.id} className="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <Checkbox
+                      name="surgeries_selected"
+                      value={option.name}
+                      defaultChecked={patient?.surgeries_selected?.includes(option.name) ?? false}
+                    />
+                    {option.name}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           <label className="text-sm font-medium text-slate-700 md:col-span-2">
-            Surgeries Text
+            Additional Notes
             <textarea
               name="surgeries_text"
               defaultValue={patient?.surgeries_text ?? ""}
@@ -192,6 +213,10 @@ export function PatientForm({ action, mode, error, patient }: PatientFormProps) 
           <label className="inline-flex items-center gap-2 text-slate-700">
             <Checkbox name="transfer_arranged" defaultChecked={patient?.transfer_arranged ?? false} />
             Transfer arranged
+          </label>
+          <label className="inline-flex items-center gap-2 text-slate-700">
+            <Checkbox name="return_transfer_arranged" defaultChecked={patient?.return_transfer_arranged ?? false} />
+            Return transfer arranged
           </label>
           <label className="inline-flex items-center gap-2 text-slate-700">
             <Checkbox name="hotel_arranged" defaultChecked={patient?.hotel_arranged ?? false} />

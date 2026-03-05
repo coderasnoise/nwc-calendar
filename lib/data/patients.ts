@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { type Patient } from "@/lib/types";
+import { type Patient, type SurgeryOption } from "@/lib/types";
 import { type PatientInput } from "@/lib/validators/patient";
 
 function normalizeFilename(filename: string) {
@@ -79,6 +79,20 @@ export async function listPatients(searchQuery?: string) {
   }
 
   return sortPatientsByNearestDate((data ?? []) as Patient[]);
+}
+
+export async function listSurgeryOptions() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("surgery_options")
+    .select("id, name")
+    .order("name", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as SurgeryOption[];
 }
 
 export async function listPatientsForTimeline() {
