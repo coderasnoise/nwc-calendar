@@ -74,6 +74,11 @@ function getNullableNumber(formData: FormData, key: string) {
 }
 
 export function patientInputFromFormData(formData: FormData): PatientInput {
+  const surgeriesSelected = formData
+    .getAll("surgeries_selected")
+    .map((value) => String(value).trim())
+    .filter((value) => value.length > 0);
+
   return {
     full_name: getTrimmedString(formData, "full_name"),
     phone: getTrimmedString(formData, "phone"),
@@ -83,9 +88,11 @@ export function patientInputFromFormData(formData: FormData): PatientInput {
     arrival_flight_code: getNullableString(formData, "arrival_flight_code"),
     consultation_date: getNullableDateString(formData, "consultation_date"),
     surgery_date: getNullableDateString(formData, "surgery_date"),
+    surgeries_selected: surgeriesSelected,
     surgeries_text: getNullableString(formData, "surgeries_text"),
     return_date: getNullableDateString(formData, "return_date"),
     return_time: getNullableTimeString(formData, "return_time"),
+    return_transfer_arranged: getBoolean(formData, "return_transfer_arranged"),
     transfer_arranged: getBoolean(formData, "transfer_arranged"),
     transfer_driver_name: getNullableString(formData, "transfer_driver_name"),
     hotel_arranged: getBoolean(formData, "hotel_arranged"),

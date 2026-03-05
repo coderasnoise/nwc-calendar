@@ -52,6 +52,7 @@ export default async function PatientDetailPage({
   }
 
   const redFlag = Boolean(patient.arrival_date && (!patient.transfer_arranged || !patient.hotel_arranged));
+  const selectedSurgeries = patient.surgeries_selected ?? [];
 
   return (
     <section className="space-y-5">
@@ -73,6 +74,9 @@ export default async function PatientDetailPage({
 
         <div className="flex flex-wrap gap-2">
           <Badge tone={patient.transfer_arranged ? "positive" : "neutral"}>Transfer {patient.transfer_arranged ? "Y" : "N"}</Badge>
+          <Badge tone={patient.return_transfer_arranged ? "positive" : "neutral"}>
+            Return Transfer {patient.return_transfer_arranged ? "Y" : "N"}
+          </Badge>
           <Badge tone={patient.hotel_arranged ? "positive" : "neutral"}>Hotel {patient.hotel_arranged ? "Y" : "N"}</Badge>
           <Badge tone={patient.booked_with_assistant ? "positive" : "neutral"}>Booked {patient.booked_with_assistant ? "Y" : "N"}</Badge>
           {redFlag ? <Badge tone="alert">Red Flag</Badge> : null}
@@ -121,6 +125,10 @@ export default async function PatientDetailPage({
               <dt className="text-slate-500">Return Time</dt>
               <dd>{displayValue(patient.return_time)}</dd>
             </div>
+            <div>
+              <dt className="text-slate-500">Return Transfer Arranged</dt>
+              <dd>{displayBool(patient.return_transfer_arranged)}</dd>
+            </div>
           </dl>
         </Card>
 
@@ -136,7 +144,11 @@ export default async function PatientDetailPage({
               <dd>{displayValue(patient.surgery_date)}</dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-slate-500">Surgeries Text</dt>
+              <dt className="text-slate-500">Surgeries</dt>
+              <dd>{selectedSurgeries.length > 0 ? selectedSurgeries.join(", ") : "—"}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-slate-500">Additional Notes</dt>
               <dd>{displayValue(patient.surgeries_text)}</dd>
             </div>
           </dl>

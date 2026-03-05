@@ -112,6 +112,10 @@ export function PatientCalendarModule({ patients }: Props) {
     }
 
     const patient = arg.event.extendedProps.patient as Patient;
+    const surgerySummary =
+      patient.surgeries_selected.length > 0
+        ? patient.surgeries_selected.join(", ")
+        : patient.surgeries_text;
     const arrivalLineParts = [patient.arrival_airport, patient.arrival_time, patient.arrival_flight_code].filter(
       Boolean
     ) as string[];
@@ -173,9 +177,9 @@ export function PatientCalendarModule({ patients }: Props) {
                 <span className="text-slate-400">Arr Date:</span> {patient.arrival_date}
               </p>
             ) : null}
-            {patient.surgeries_text ? (
+            {surgerySummary ? (
               <p>
-                <span className="text-slate-400">Surg:</span> {patient.surgeries_text}
+                <span className="text-slate-400">Surg:</span> {surgerySummary}
               </p>
             ) : null}
           </div>
