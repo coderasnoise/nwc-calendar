@@ -34,6 +34,7 @@ export interface Patient {
 export interface SurgeryOption {
   id: string;
   name: string;
+  category: "face" | "body" | "other";
 }
 
 export interface AuditLog {
