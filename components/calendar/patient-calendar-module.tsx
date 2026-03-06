@@ -41,6 +41,13 @@ const monthRowLabels: Record<CalendarFilter, string> = {
   return: "Return"
 };
 
+const legendItems: Array<{ label: string; className: string }> = [
+  { label: "Arrival", className: "bg-red-500 text-white" },
+  { label: "Consultation", className: "bg-blue-500 text-white" },
+  { label: "Surgery", className: "bg-green-500 text-white" },
+  { label: "Return", className: "bg-yellow-400 text-black" }
+];
+
 function FilterPill({
   label,
   checked,
@@ -201,6 +208,22 @@ export function PatientCalendarModule({ patients }: Props) {
           />
           <FilterPill label="Surgeries" checked={filters.surgery} onClick={() => toggleFilter("surgery")} />
           <FilterPill label="Returns" checked={filters.return} onClick={() => toggleFilter("return")} />
+        </div>
+        <div className="mt-4 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Color Legend</p>
+          <div className="flex flex-wrap gap-2">
+            {legendItems.map((item) => (
+              <span
+                key={item.label}
+                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${item.className}`}
+              >
+                {item.label}
+              </span>
+            ))}
+            <span className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
+              Red Flag (missing transfer/hotel on arrival)
+            </span>
+          </div>
         </div>
         {currentView === "dayGridWeek" ? (
           <p className="mt-3 text-xs text-slate-500">T=Transfer, H=Hotel, B=Booked</p>
