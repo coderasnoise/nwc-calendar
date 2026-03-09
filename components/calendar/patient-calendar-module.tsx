@@ -34,6 +34,8 @@ const monthRowStyles: Record<CalendarFilter, string> = {
   return: "bg-yellow-400 text-black hover:bg-yellow-500"
 };
 
+const cancelledRowStyle = "bg-pink-500 text-white hover:bg-pink-600";
+
 const monthRowLabels: Record<CalendarFilter, string> = {
   arrival: "Arrival",
   consultation: "Consultation",
@@ -45,7 +47,8 @@ const legendItems: Array<{ label: string; className: string }> = [
   { label: "Arrival", className: "bg-red-500 text-white" },
   { label: "Consultation", className: "bg-blue-500 text-white" },
   { label: "Surgery", className: "bg-green-500 text-white" },
-  { label: "Return", className: "bg-yellow-400 text-black" }
+  { label: "Return", className: "bg-yellow-400 text-black" },
+  { label: "Cancelled", className: "bg-pink-500 text-white" }
 ];
 
 function FilterPill({
@@ -98,7 +101,9 @@ export function PatientCalendarModule({ patients }: Props) {
 
   function renderEventContent(arg: EventContentArg) {
     const isMonth = arg.view.type === "dayGridMonth";
+    const patient = arg.event.extendedProps.patient as Patient;
     const redFlag = Boolean(arg.event.extendedProps.redFlag);
+    const isCancelled = Boolean(patient.is_cancelled);
 
     if (isMonth) {
       const matchedTypes = (arg.event.extendedProps.matchedTypes as CalendarFilter[] | undefined) ?? [];
@@ -109,7 +114,9 @@ export function PatientCalendarModule({ patients }: Props) {
             <span
               key={`${arg.event.id}-${type}`}
               title={monthRowLabels[type]}
-              className={`block truncate rounded-md px-2 py-1 text-xs font-medium leading-4 transition-colors ${monthRowStyles[type]}`}
+              className={`block truncate rounded-md px-2 py-1 text-xs font-medium leading-4 transition-colors ${
+                isCancelled ? cancelledRowStyle : monthRowStyles[type]
+              }`}
             >
               {arg.event.title}
             </span>
@@ -118,7 +125,6 @@ export function PatientCalendarModule({ patients }: Props) {
       );
     }
 
-    const patient = arg.event.extendedProps.patient as Patient;
     const surgerySummary =
       patient.surgeries_selected.length > 0
         ? patient.surgeries_selected.join(", ")
@@ -131,7 +137,11 @@ export function PatientCalendarModule({ patients }: Props) {
     return (
       <article
         className={`box-border min-w-0 w-full overflow-hidden whitespace-normal break-words rounded-md border bg-white p-2.5 shadow-sm ${
-          redFlag ? "border-red-200 bg-red-50/70" : "border-slate-200"
+          isCancelled
+            ? "border-pink-200 bg-pink-50/80"
+            : redFlag
+              ? "border-red-200 bg-red-50/70"
+              : "border-slate-200"
         }`}
       >
         <div className="min-w-0 w-full space-y-2">

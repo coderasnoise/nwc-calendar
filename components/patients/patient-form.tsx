@@ -174,6 +174,15 @@ export function PatientForm({ action, mode, error, patient, surgeryOptions }: Pa
             />
           </label>
           <label className="text-sm font-medium text-slate-700">
+            Consultation Time
+            <Input
+              type="time"
+              name="consultation_time"
+              defaultValue={formatTimeInputValue(patient?.consultation_time)}
+              className="mt-1"
+            />
+          </label>
+          <label className="text-sm font-medium text-slate-700">
             Surgery Date
             <Input
               type="date"
@@ -257,6 +266,10 @@ export function PatientForm({ action, mode, error, patient, surgeryOptions }: Pa
               defaultChecked={patient?.booked_with_assistant ?? false}
             />
             Booked with assistant
+          </label>
+          <label className="inline-flex items-center gap-2 text-slate-700">
+            <Checkbox name="is_cancelled" defaultChecked={patient?.is_cancelled ?? false} />
+            Is cancelled
           </label>
         </div>
       </Card>

@@ -9,6 +9,7 @@ export interface Patient {
   arrival_airport: "IST" | "SAW" | null;
   arrival_flight_code: string | null;
   consultation_date: string | null;
+  consultation_time: string | null;
   surgery_date: string | null;
   surgeries_text: string | null;
   return_date: string | null;
@@ -19,6 +20,7 @@ export interface Patient {
   hotel_arranged: boolean;
   hotel_room_type: string | null;
   booked_with_assistant: boolean;
+  is_cancelled: boolean;
   patient_passport_number: string | null;
   patient_passport_photo_path: string | null;
   companion_full_name: string | null;
