@@ -77,6 +77,9 @@ export default async function PatientDetailPage({
           <Badge tone={patient.return_transfer_arranged ? "positive" : "neutral"}>
             Return Transfer {patient.return_transfer_arranged ? "Y" : "N"}
           </Badge>
+          <Badge tone={patient.is_cancelled ? "alert" : "neutral"}>
+            Cancelled {patient.is_cancelled ? "Y" : "N"}
+          </Badge>
           <Badge tone={patient.hotel_arranged ? "positive" : "neutral"}>Hotel {patient.hotel_arranged ? "Y" : "N"}</Badge>
           <Badge tone={patient.booked_with_assistant ? "positive" : "neutral"}>Booked {patient.booked_with_assistant ? "Y" : "N"}</Badge>
           {redFlag ? <Badge tone="alert">Red Flag</Badge> : null}
@@ -140,6 +143,10 @@ export default async function PatientDetailPage({
               <dd>{displayValue(patient.consultation_date)}</dd>
             </div>
             <div>
+              <dt className="text-slate-500">Consultation Time</dt>
+              <dd>{displayValue(patient.consultation_time)}</dd>
+            </div>
+            <div>
               <dt className="text-slate-500">Surgery Date</dt>
               <dd>{displayValue(patient.surgery_date)}</dd>
             </div>
@@ -176,6 +183,10 @@ export default async function PatientDetailPage({
             <div>
               <dt className="text-slate-500">Booked with Assistant</dt>
               <dd>{displayBool(patient.booked_with_assistant)}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Is Cancelled</dt>
+              <dd>{displayBool(patient.is_cancelled)}</dd>
             </div>
           </dl>
         </Card>
