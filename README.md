@@ -40,6 +40,7 @@ npm run dev
 - `/timeline`
 - `/audit`
 - `/import`
+- `/internal/login-logs` (private, access-controlled)
 
 ## Auth Protection
 - Middleware enforces authentication on `/dashboard`, `/patients`, `/calendar`, `/timeline`, and `/audit`.
@@ -103,3 +104,11 @@ Use lowercase usernames only.
 - `.ics` imports: use `/import` to preview and import Google Calendar exports into `patients` using `surgery_date`.
 - Optional performance migration for import dedupe:
   - `supabase/migrations/0004_import_indexes.sql`
+- Login log setup:
+  - Apply `supabase/migrations/0012_login_logs_private.sql`
+  - Add allowed viewer manually (only this user can open `/internal/login-logs`):
+    ```sql
+    insert into public.login_log_viewers (user_id)
+    values ('<YOUR_AUTH_USER_ID>')
+    on conflict (user_id) do nothing;
+    ```
