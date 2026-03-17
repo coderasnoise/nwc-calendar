@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
@@ -37,13 +38,28 @@ export async function login(formData: FormData) {
     redirect("/login?error=Invalid%20username%20or%20password.");
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: emailFromUsername,
     password: parsed.data.password
   });
 
   if (error) {
     redirect("/login?error=Invalid%20username%20or%20password.");
+  }
+
+  const user = data.user;
+  if (user?.id) {
+    const headerStore = await headers();
+    const forwardedFor = headerStore.get("x-forwarded-for");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0]?.trim() ?? null : null;
+    const userAgent = headerStore.get("user-agent");
+
+    await supabase.rpc("log_login_event", {
+      p_user_id: user.id,
+      p_user_email: user.email ?? emailFromUsername,
+      p_ip_address: ipAddress,
+      p_user_agent: userAgent
+    });
   }
 
   redirect("/dashboard");

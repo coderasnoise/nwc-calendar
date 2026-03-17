@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/calendar") ||
     pathname.startsWith("/timeline") ||
     pathname.startsWith("/audit") ||
+    pathname.startsWith("/internal") ||
     pathname.startsWith("/import");
 
   if (isProtectedPath && !user) {
