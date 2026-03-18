@@ -112,3 +112,12 @@ Use lowercase usernames only.
     values ('<YOUR_AUTH_USER_ID>')
     on conflict (user_id) do nothing;
     ```
+- Session timeout setup:
+  - Apply `supabase/migrations/0013_session_timeout_exempt_users.sql`
+  - Default behavior: authenticated users are logged out after 30 minutes from login.
+  - Exempt a user from timeout:
+    ```sql
+    insert into public.session_timeout_exempt_users (user_id)
+    values ('<YOUR_AUTH_USER_ID>')
+    on conflict (user_id) do nothing;
+    ```

@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+
+const LOGIN_STARTED_AT_COOKIE = "app_login_started_at";
 
 const loginSchema = z.object({
   username: z
@@ -50,9 +52,17 @@ export async function login(formData: FormData) {
   const user = data.user;
   if (user?.id) {
     const headerStore = await headers();
+    const cookieStore = await cookies();
     const forwardedFor = headerStore.get("x-forwarded-for");
     const ipAddress = forwardedFor ? forwardedFor.split(",")[0]?.trim() ?? null : null;
     const userAgent = headerStore.get("user-agent");
+
+    cookieStore.set(LOGIN_STARTED_AT_COOKIE, String(Date.now()), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      path: "/"
+    });
 
     await supabase.rpc("log_login_event", {
       p_user_id: user.id,
