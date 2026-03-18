@@ -2,6 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPublicEnv } from "@/lib/env";
 
+const LOGIN_STARTED_AT_COOKIE = "app_login_started_at";
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+
 type CookieToSet = {
   name: string;
   value: string;
@@ -45,6 +48,47 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/audit") ||
     pathname.startsWith("/internal") ||
     pathname.startsWith("/import");
+
+  if (user) {
+    const { data: exemptUser } = await supabase
+      .from("session_timeout_exempt_users")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const isExempt = Boolean(exemptUser);
+
+    if (!isExempt) {
+      const startedAtCookie = request.cookies.get(LOGIN_STARTED_AT_COOKIE)?.value;
+      const startedAt = startedAtCookie ? Number(startedAtCookie) : Number.NaN;
+
+      if (Number.isFinite(startedAt) && Date.now() - startedAt > SESSION_TIMEOUT_MS) {
+        await supabase.auth.signOut();
+
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.search = "?error=Session%20expired";
+
+        const redirectResponse = NextResponse.redirect(url);
+        response.cookies.getAll().forEach((cookie) => {
+          redirectResponse.cookies.set(cookie);
+        });
+        redirectResponse.cookies.delete(LOGIN_STARTED_AT_COOKIE);
+        return redirectResponse;
+      }
+
+      if (!Number.isFinite(startedAt)) {
+        response.cookies.set(LOGIN_STARTED_AT_COOKIE, String(Date.now()), {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: true,
+          path: "/"
+        });
+      }
+    } else if (request.cookies.get(LOGIN_STARTED_AT_COOKIE)) {
+      response.cookies.delete(LOGIN_STARTED_AT_COOKIE);
+    }
+  }
 
   if (isProtectedPath && !user) {
     const url = request.nextUrl.clone();
