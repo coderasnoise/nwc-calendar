@@ -89,6 +89,31 @@ async function resolveActorEmailMap(actorIds: string[]) {
     return emailMap;
   }
 
+  const supabase = await createClient();
+  const { data: mappedEmails, error: mappedEmailError } = await supabase.rpc("get_user_emails_by_ids", {
+    p_user_ids: uniqueIds
+  });
+
+  if (!mappedEmailError && Array.isArray(mappedEmails)) {
+    mappedEmails.forEach((row) => {
+      if (
+        row &&
+        typeof row === "object" &&
+        "user_id" in row &&
+        "email" in row &&
+        typeof row.user_id === "string" &&
+        typeof row.email === "string"
+      ) {
+        emailMap.set(row.user_id, row.email);
+      }
+    });
+  }
+
+  const unresolvedIds = uniqueIds.filter((id) => !emailMap.has(id));
+  if (unresolvedIds.length === 0) {
+    return emailMap;
+  }
+
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
     return emailMap;
@@ -100,7 +125,7 @@ async function resolveActorEmailMap(actorIds: string[]) {
     { auth: { persistSession: false, autoRefreshToken: false } }
   );
 
-  const targetIds = new Set(uniqueIds);
+  const targetIds = new Set(unresolvedIds);
   const perPage = 200;
   let page = 1;
 
