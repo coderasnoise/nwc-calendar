@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+echo "Running Supabase backup before commit..."
+npm run backup:db

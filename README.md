@@ -31,6 +31,8 @@ npm run dev
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (optional in app runtime, useful for admin scripts)
+- `SUPABASE_DB_URL` (required for commit-time database backups)
+- `SUPABASE_BACKUP_BUCKET` (optional, defaults to `db-backups`)
 
 ## Main Routes
 - `/login`
@@ -56,6 +58,8 @@ npm run dev
 - `npm run format`
 - `npm run typecheck`
 - `npm run test`
+- `npm run backup:db`
+- `npm run setup:githooks`
 
 ## Deployment Guide (Vercel + Supabase)
 1. Push repository to GitHub.
@@ -120,4 +124,23 @@ Use lowercase usernames only.
     insert into public.session_timeout_exempt_users (user_id)
     values ('<YOUR_AUTH_USER_ID>')
     on conflict (user_id) do nothing;
+    ```
+- Commit-time database backup setup:
+  - Create a private Supabase Storage bucket named `db-backups` or set `SUPABASE_BACKUP_BUCKET`.
+  - Keep secrets only in local `.env` or `.env.local`. These files remain gitignored and must never be committed.
+  - Install the repo-managed git hook:
+    ```bash
+    npm run setup:githooks
+    ```
+  - Manual backup command:
+    ```bash
+    npm run backup:db
+    ```
+  - Backup flow:
+    - creates a temporary full `pg_dump -Fc` dump
+    - uploads it to `database-backups/YYYY/MM/db-backup-<timestamp>.dump`
+    - removes the temporary local file after upload
+  - Restore example:
+    ```bash
+    pg_restore --clean --if-exists --no-owner --no-privileges -d "<TARGET_DATABASE_URL>" "/path/to/db-backup-2026-03-19T12-30-00Z.dump"
     ```
