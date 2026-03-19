@@ -62,7 +62,7 @@ export async function updateSession(request: NextRequest) {
       const startedAtCookie = request.cookies.get(LOGIN_STARTED_AT_COOKIE)?.value;
       const startedAt = startedAtCookie ? Number(startedAtCookie) : Number.NaN;
 
-      if (Number.isFinite(startedAt) && Date.now() - startedAt > SESSION_TIMEOUT_MS) {
+      if (!Number.isFinite(startedAt)) {
         await supabase.auth.signOut();
 
         const url = request.nextUrl.clone();
@@ -77,13 +77,19 @@ export async function updateSession(request: NextRequest) {
         return redirectResponse;
       }
 
-      if (!Number.isFinite(startedAt)) {
-        response.cookies.set(LOGIN_STARTED_AT_COOKIE, String(Date.now()), {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: true,
-          path: "/"
+      if (Date.now() - startedAt > SESSION_TIMEOUT_MS) {
+        await supabase.auth.signOut();
+
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.search = "?error=Session%20expired";
+
+        const redirectResponse = NextResponse.redirect(url);
+        response.cookies.getAll().forEach((cookie) => {
+          redirectResponse.cookies.set(cookie);
         });
+        redirectResponse.cookies.delete(LOGIN_STARTED_AT_COOKIE);
+        return redirectResponse;
       }
     } else if (request.cookies.get(LOGIN_STARTED_AT_COOKIE)) {
       response.cookies.delete(LOGIN_STARTED_AT_COOKIE);
