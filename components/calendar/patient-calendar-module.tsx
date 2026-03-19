@@ -252,6 +252,8 @@ export function PatientCalendarModule({ patients }: Props) {
           events={events}
           eventContent={renderEventContent}
           dayMaxEvents={3}
+          showNonCurrentDates={false}
+          fixedWeekCount={false}
           moreLinkContent={(args) => `+${args.num} more`}
           eventClick={(arg) => {
             arg.jsEvent.preventDefault();
