@@ -244,6 +244,7 @@ export function PatientCalendarModule({ patients }: Props) {
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
+          firstDay={1}
           headerToolbar={{
             left: "prev,next today",
             center: "title",
