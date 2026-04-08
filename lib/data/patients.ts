@@ -4,6 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { type Patient, type SurgeryOption } from "@/lib/types";
 import { type PatientInput } from "@/lib/validators/patient";
 
+export type FollowUpExportRow = {
+  id: string;
+  full_name: string;
+  phone: string;
+  surgery_date: string;
+};
+
 function normalizeFilename(filename: string) {
   return filename.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
@@ -105,6 +112,30 @@ export async function listSurgeryOptions() {
     }
     return a.name.localeCompare(b.name);
   });
+}
+
+export async function listPatientsForFollowUpExport(from: string, to: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("patients")
+    .select("id, full_name, phone, surgery_date")
+    .gte("surgery_date", from)
+    .lte("surgery_date", to)
+    .eq("is_cancelled", false)
+    .order("surgery_date", { ascending: true })
+    .order("full_name", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).filter(
+    (row): row is FollowUpExportRow =>
+      typeof row.id === "string" &&
+      typeof row.full_name === "string" &&
+      typeof row.phone === "string" &&
+      typeof row.surgery_date === "string"
+  );
 }
 
 export async function listPatientsForTimeline() {

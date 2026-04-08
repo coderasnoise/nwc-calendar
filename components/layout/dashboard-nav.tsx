@@ -10,6 +10,7 @@ const links = [
   { href: "/calendar", label: "Calendar" },
   { href: "/timeline", label: "Timeline" },
   { href: "/audit", label: "Audit" },
+  { href: "/export", label: "Export" },
   { href: "/import", label: "Import" }
 ];
 
